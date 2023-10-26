@@ -43,7 +43,7 @@ const UserSchema = new mongoose.Schema({
   },
   role: { type: String, enum: ["user", "admin"], default: "user" },
   resetPasswordCode: String,
-  address: [
+  addresses: [
     {
       city: { type: String, required: true },
       street: { type: String, required: true },
