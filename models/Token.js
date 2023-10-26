@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 // schema
 const TokenSchema = new mongoose.Schema({
-  token: { type: String, required: true },
+  token: { type: String, required: true, unique: true },
   user: { type: mongoose.Types.ObjectId, ref: "User", required: true },
   isValid: { type: Boolean, default: true },
   expireAt: { type: Date },
