@@ -15,7 +15,7 @@ const CategorySchema = new mongoose.Schema({
     url: { type: String, required: true },
     id: { type: String, required: true },
   },
-  createdBy: { type: mongoose.Types.ObjectId, ref: "User" },
+  createdBy: { type: mongoose.Types.ObjectId, ref: "User", required: true },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
