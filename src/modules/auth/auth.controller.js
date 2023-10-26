@@ -3,7 +3,7 @@ const cryptoJS = require("crypto-js");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 
-const { User, Cart, Token } = require("../../../models");
+const { User, Cart, Token } = require("../../models");
 const sendEmail = require("../../utils/sendEmail");
 
 // register
