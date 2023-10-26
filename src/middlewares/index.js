@@ -1,2 +1,3 @@
-module.exports.isValid = require("./validation.middleware");
-module.exports.isAuthenticated = require("./authentication.middleware");
+module.exports.isValid = require("./validation");
+module.exports.isAuthenticated = require("./authentication");
+module.exports.isAuthorized = require("./authorization");

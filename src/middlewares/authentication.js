@@ -37,6 +37,12 @@ const isAuthenticated = async (req, res, next) => {
         .status(404)
         .json({ success: false, message: "User not found" });
 
+    // check user status
+    if (user.isBlocked.status)
+      return res
+        .status(403)
+        .json({ success: false, message: "User is blocked" });
+
     // attach user and token to req
     req.user = user;
     req.token = token;
