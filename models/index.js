@@ -6,3 +6,4 @@ module.exports.Brand = require("./Brand.js");
 module.exports.Product = require("./Product.js");
 module.exports.Review = require("./Review.js");
 module.exports.Cart = require("./Cart.js");
+module.exports.Order = require("./Order.js");

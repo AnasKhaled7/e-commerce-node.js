@@ -43,6 +43,22 @@ const UserSchema = new mongoose.Schema({
   },
   role: { type: String, enum: ["user", "admin"], default: "user" },
   resetPasswordCode: String,
+  address: [
+    {
+      city: { type: String, required: true },
+      street: { type: String, required: true },
+      building: { type: String, required: true },
+      floor: { type: String },
+      apartment: { type: String },
+      label: {
+        type: String,
+        required: true,
+        default: "home",
+        enum: ["home", "work", "other"],
+      },
+      isDefault: { type: Boolean, default: false },
+    },
+  ],
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
