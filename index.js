@@ -1,4 +1,4 @@
-const dotenv = require("dotenv");
+require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 
@@ -11,7 +11,6 @@ const productRouter = require("./src/modules/product/product.router");
 const cartRouter = require("./src/modules/cart/cart.router");
 const orderRouter = require("./src/modules/order/order.router");
 
-dotenv.config();
 const app = express();
 
 // DB connection
