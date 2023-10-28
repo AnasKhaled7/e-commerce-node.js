@@ -41,7 +41,7 @@ const UserSchema = new mongoose.Schema({
     status: { type: Boolean, default: false },
     reason: { type: String },
   },
-  role: { type: String, enum: ["user", "admin"], default: "user" },
+  role: { type: String, enum: ["user", "admin", "manager"], default: "user" },
   resetPasswordCode: String,
   addresses: [
     {

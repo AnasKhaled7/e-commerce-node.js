@@ -1,53 +1,55 @@
 const jwt = require("jsonwebtoken");
 
-const { User, Token } = require("../models");
+const { Token } = require("../models");
 
 const isAuthenticated = async (req, res, next) => {
   try {
+    let token = req.headers.authorization;
     // check token existence
     if (
-      !req.header("Authorization") ||
-      !req.header("Authorization").startsWith("Bearer ")
+      !token ||
+      !token.startsWith("Bearer ") ||
+      token.split(" ")[1] === "null"
     )
       return res
         .status(401)
-        .json({ success: false, message: "Access token missing from header" });
+        .json({ success: false, message: "Access token not valid" });
 
     // get token from header
-    const token = req.header("Authorization").split(" ")[1];
+    token = token.split(" ")[1];
+
+    // check token existence
+    const tokenDoc = await Token.findOne({ token });
+    if (!tokenDoc)
+      return res
+        .status(401)
+        .json({ success: false, message: "Access token not valid" });
+
+    // check token isValid & expireAt date & user
+    if (!tokenDoc.isValid || new Date() > tokenDoc.expireAt)
+      return res
+        .status(401)
+        .json({ success: false, message: "Access token not valid" });
 
     // verify token
     const decode = jwt.verify(token, process.env.JWT_SECRET);
 
-    // check token existence
-    const tokenDoc = await Token.findOne({ token, user: decode._id });
-    if (!tokenDoc)
-      return res.status(401).json({ success: false, message: "Invalid token" });
-
-    // check token validity
-    if (!tokenDoc.isValid || tokenDoc.expireAt < new Date()) {
-      await Token.findByIdAndDelete(tokenDoc._id);
-      return res.status(401).json({ success: false, message: "Expired token" });
-    }
-
-    // check user existence
-    const user = await User.findById(decode._id);
-    if (!user)
+    if (!decode)
       return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
+        .status(401)
+        .json({ success: false, message: "Access token not valid" });
 
-    // check user status
-    if (user.isBlocked.status)
+    // check user
+    if (tokenDoc.user.toString() !== decode._id)
       return res
-        .status(403)
-        .json({ success: false, message: "User is blocked" });
+        .status(401)
+        .json({ success: false, message: "Access token not valid" });
 
     // attach user and token to req
-    req.user = user;
+    req.user = decode;
     req.token = token;
 
-    next();
+    return next();
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
