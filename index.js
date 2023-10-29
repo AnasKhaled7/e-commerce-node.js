@@ -1,5 +1,6 @@
 require("dotenv").config();
 const express = require("express");
+const cors = require("cors");
 const mongoose = require("mongoose");
 
 const authRouter = require("./src/modules/auth/auth.router");
@@ -19,6 +20,9 @@ mongoose
   .then(() => console.log("DB connected!"))
   .catch((err) => console.log("DB failed to connect!", err));
 
+// cors
+app.use(cors());
+
 // global middleware
 app.use(express.json());
 
@@ -36,6 +40,13 @@ app.use("/api/v1/order", orderRouter);
 app.all("*", (req, res) =>
   res.status(404).json({ success: false, message: "Resource not found!" })
 );
+
+// error handler
+app.use((err, req, res, next) => {
+  return res
+    .status(err.cause || 500)
+    .json({ success: false, message: err.message });
+});
 
 app.listen(process.env.PORT || 5000, () =>
   console.log(`e-commerce app is running!`)
