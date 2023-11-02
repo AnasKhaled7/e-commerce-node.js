@@ -13,13 +13,13 @@ import productRouter from "./src/modules/product/product.router.js";
 import cartRouter from "./src/modules/cart/cart.router.js";
 import orderRouter from "./src/modules/order/order.router.js";
 
-const app = express();
-
 // DB connection
 mongoose
-  .connect(process.env.CONNECTION_URI, { dbName: "e-commerce" })
+  .connect(process.env.MONGO_URI)
   .then(() => console.log("DB connected!"))
   .catch((err) => console.log("DB failed to connect!", err));
+
+const app = express();
 
 // cors
 app.use(cors());
