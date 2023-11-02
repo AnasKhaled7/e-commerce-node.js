@@ -6,9 +6,6 @@ export const logout = async (req, res) => {
     // delete the token from the database
     await Token.deleteOne({ token: req.token, user: req.user._id });
 
-    // set user isOnline to false
-    await User.findByIdAndUpdate(req.user._id, { isOnline: false });
-
     return res.status(200).json({ success: true, message: "logged out" });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });

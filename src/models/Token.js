@@ -3,8 +3,8 @@ import mongoose from "mongoose";
 // schema
 const TokenSchema = new mongoose.Schema(
   {
-    token: { type: String, required: true, unique: true },
     user: { type: mongoose.Types.ObjectId, ref: "User", required: true },
+    token: { type: String, required: true, unique: true },
     isValid: { type: Boolean, default: true },
     expireAt: { type: Date },
     agent: { type: String },

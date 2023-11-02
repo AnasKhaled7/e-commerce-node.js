@@ -79,10 +79,6 @@ export const login = async (req, res) => {
       expireAt: new Date(jwt.decode(token).exp * 1000),
     });
 
-    // update user status
-    user.isOnline = true;
-    await user.save();
-
     return res.status(200).json({ success: true, token });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });

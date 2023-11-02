@@ -25,7 +25,7 @@ export const createCategory = async (req, res) => {
     const category = await Category.create({
       name: req.body.name,
       image: { url: secure_url, id: public_id },
-      createdBy: req.user._id,
+      user: req.user._id,
     });
 
     return res.status(201).json({ success: true, category });
@@ -60,12 +60,12 @@ export const getCategories = async (req, res) => {
       {
         $lookup: {
           from: "users",
-          localField: "createdBy",
+          localField: "user",
           foreignField: "_id",
-          as: "createdBy",
+          as: "user",
         },
       },
-      { $unwind: "$createdBy" },
+      { $unwind: "$user" },
       { $sort: { createdAt: -1 } },
       { $skip: (page - 1) * limit },
       { $limit: Number(limit) },
@@ -75,7 +75,7 @@ export const getCategories = async (req, res) => {
           description: 1,
           image: 1,
           createdAt: 1,
-          createdBy: {
+          user: {
             _id: 1,
             firstName: 1,
             lastName: 1,

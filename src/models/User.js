@@ -3,27 +3,13 @@ import mongoose from "mongoose";
 // schema
 const UserSchema = new mongoose.Schema(
   {
-    firstName: {
-      type: String,
-      minLength: 3,
-      maxLength: 30,
-      lowercase: true,
-      trim: true,
-      required: true,
-    },
-    lastName: {
-      type: String,
-      minLength: 3,
-      maxLength: 30,
-      lowercase: true,
-      trim: true,
-      required: true,
-    },
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
     email: {
       type: String,
-      unique: true,
-      lowercase: true,
       trim: true,
+      lowercase: true,
+      unique: true,
       required: true,
     },
     password: { type: String, required: true },
@@ -37,7 +23,6 @@ const UserSchema = new mongoose.Schema(
       },
       id: { type: String, default: "e-commerce/user/default-profile_vl2nvl" },
     },
-    isOnline: { type: Boolean, default: false },
     isBlocked: {
       status: { type: Boolean, default: false },
       reason: { type: String },

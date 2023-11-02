@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 const OrderSchema = new mongoose.Schema(
   {
     user: { type: mongoose.Types.ObjectId, ref: "User", required: true },
-    products: [
+    orderItems: [
       {
         _id: false,
         product: {
@@ -12,12 +12,16 @@ const OrderSchema = new mongoose.Schema(
           ref: "Product",
           required: true,
         },
+        name: { type: String, required: true },
         quantity: { type: Number, default: 1 },
-        productName: { type: String, required: true },
-        productPrice: { type: Number, required: true },
+        price: { type: Number, required: true },
+        image: {
+          id: { type: String, required: true },
+          url: { type: String, required: true },
+        },
       },
     ],
-    address: {
+    shippingAddress: {
       city: { type: String, required: true },
       street: { type: String, required: true },
       building: { type: String, required: true },
@@ -32,20 +36,26 @@ const OrderSchema = new mongoose.Schema(
       },
     },
     phone: { type: String, required: true },
-    total: { type: Number, default: 0 },
-    status: {
-      type: String,
-      lowercase: true,
-      default: "pending",
-      enum: ["pending", "processing", "delivering", "delivered", "cancelled"],
-    },
     paymentMethod: {
       type: String,
       lowercase: true,
       default: "cash",
       enum: ["cash", "card"],
     },
-    paid: { type: Boolean, default: false },
+    paymentResult: {
+      id: String,
+      status: String,
+      update_time: String,
+      email_address: String,
+    },
+    itemsPrice: { type: Number, default: 0.0 },
+    taxPrice: { type: Number, default: 0.0 },
+    shippingPrice: { type: Number, default: 0.0 },
+    totalPrice: { type: Number, default: 0.0 },
+    isPaid: { type: Boolean, default: false },
+    paidAt: { type: Date },
+    isDelivered: { type: Boolean, default: false },
+    deliveredAt: { type: Date },
   },
   { timestamps: true }
 );
