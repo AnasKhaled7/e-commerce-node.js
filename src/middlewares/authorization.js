@@ -6,4 +6,4 @@ const isAuthorized = (roles) => {
   };
 };
 
-module.exports = isAuthorized;
+export default isAuthorized;

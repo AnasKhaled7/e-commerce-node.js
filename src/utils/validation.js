@@ -1,11 +1,4 @@
-const mongoose = require("mongoose").Types;
+import { Types } from "mongoose";
 
-const isValidObjectId = (id, helper) => {
-  return mongoose.ObjectId.isValid(id)
-    ? true
-    : helper.message("Invalid ObjectId");
-};
-
-module.exports = {
-  isValidObjectId,
-};
+export const isValidObjectId = (id, helper) =>
+  Types.ObjectId.isValid(id) ? true : helper.message("Invalid ObjectId");

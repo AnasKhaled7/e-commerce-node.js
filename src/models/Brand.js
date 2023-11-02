@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 // schema
 const brandSchema = new mongoose.Schema(
@@ -7,7 +7,6 @@ const brandSchema = new mongoose.Schema(
       type: String,
       minLength: 3,
       maxLength: 50,
-      lowercase: true,
       unique: true,
       required: true,
       trim: true,
@@ -24,4 +23,4 @@ const brandSchema = new mongoose.Schema(
 // model
 const Brand = mongoose.models.Brand || mongoose.model("Brand", brandSchema);
 
-module.exports = Brand;
+export default Brand;

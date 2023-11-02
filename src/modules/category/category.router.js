@@ -1,9 +1,15 @@
-const router = require("express").Router();
+import { Router } from "express";
 
-const { isAuthorized, isAuthenticated, isValid } = require("../../middlewares");
-const { upload, filter } = require("../../utils/multer");
-const categoryValidation = require("./category.validation");
-const categoryController = require("./category.controller");
+import {
+  isAuthenticated,
+  isAuthorized,
+  isValid,
+} from "../../middlewares/index.js";
+import { upload, filter } from "../../utils/multer.js";
+import * as categoryValidation from "./category.validation.js";
+import * as categoryController from "./category.controller.js";
+
+const router = Router();
 
 // create category
 router.post(
@@ -40,4 +46,4 @@ router.delete(
   categoryController.deleteCategory
 );
 
-module.exports = router;
+export default router;

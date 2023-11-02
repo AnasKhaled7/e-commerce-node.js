@@ -1,7 +1,9 @@
-const router = require("express").Router();
+import { Router } from "express";
 
-router.get("/", (req, res) => {
-  res.send("test");
-});
+// import { isValid } from "../../middlewares/index.js";
+// import * as orderValidation from "./order.validation.js";
+// import * as orderController from "./order.controller.js";
 
-module.exports = router;
+const router = Router();
+
+export default router;

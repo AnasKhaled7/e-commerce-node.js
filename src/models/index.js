@@ -1,9 +1,10 @@
-module.exports.User = require("./User.js");
-module.exports.Token = require("./Token.js");
-module.exports.Category = require("./Category.js");
-module.exports.Subcategory = require("./Subcategory.js");
-module.exports.Brand = require("./Brand.js");
-module.exports.Product = require("./Product.js");
-module.exports.Review = require("./Review.js");
-module.exports.Cart = require("./Cart.js");
-module.exports.Order = require("./Order.js");
+import User from "./User.js";
+import Token from "./Token.js";
+import Category from "./Category.js";
+import Brand from "./Brand.js";
+import Product from "./Product.js";
+import Review from "./Review.js";
+import Cart from "./Cart.js";
+import Order from "./Order.js";
+
+export { User, Token, Category, Brand, Product, Review, Cart, Order };

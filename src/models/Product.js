@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 // schema
 const productSchema = new mongoose.Schema(
@@ -7,7 +7,6 @@ const productSchema = new mongoose.Schema(
       type: String,
       minLength: 3,
       maxLength: 50,
-      lowercase: true,
       unique: true,
       required: true,
       trim: true,
@@ -29,9 +28,9 @@ const productSchema = new mongoose.Schema(
         url: { type: String, required: true },
       },
     ],
-    subcategory: {
+    category: {
       type: mongoose.Types.ObjectId,
-      ref: "Subcategory",
+      ref: "Category",
       required: true,
     },
     brand: { type: mongoose.Types.ObjectId, ref: "Brand", required: true },
@@ -48,4 +47,4 @@ const productSchema = new mongoose.Schema(
 const Product =
   mongoose.models.Product || mongoose.model("Product", productSchema);
 
-module.exports = Product;
+export default Product;

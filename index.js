@@ -1,16 +1,17 @@
-require("dotenv").config();
-const express = require("express");
-const cors = require("cors");
-const mongoose = require("mongoose");
+import dotenv from "dotenv";
+import express from "express";
+import mongoose from "mongoose";
+import cors from "cors";
 
-const authRouter = require("./src/modules/auth/auth.router");
-const userRouter = require("./src/modules/user/user.router");
-const categoryRouter = require("./src/modules/category/category.router");
-const subcategoryRouter = require("./src/modules/subcategory/subcategory.router");
-const brandRouter = require("./src/modules/brand/brand.router");
-const productRouter = require("./src/modules/product/product.router");
-const cartRouter = require("./src/modules/cart/cart.router");
-const orderRouter = require("./src/modules/order/order.router");
+dotenv.config();
+
+import authRouter from "./src/modules/auth/auth.router.js";
+import userRouter from "./src/modules/user/user.router.js";
+import categoryRouter from "./src/modules/category/category.router.js";
+import brandRouter from "./src/modules/brand/brand.router.js";
+import productRouter from "./src/modules/product/product.router.js";
+import cartRouter from "./src/modules/cart/cart.router.js";
+import orderRouter from "./src/modules/order/order.router.js";
 
 const app = express();
 
@@ -30,7 +31,6 @@ app.use(express.json());
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/category", categoryRouter);
-app.use("/api/v1/subcategory", subcategoryRouter);
 app.use("/api/v1/brand", brandRouter);
 app.use("/api/v1/product", productRouter);
 app.use("/api/v1/cart", cartRouter);
@@ -42,11 +42,9 @@ app.all("*", (req, res) =>
 );
 
 // error handler
-app.use((err, req, res, next) => {
-  return res
-    .status(err.cause || 500)
-    .json({ success: false, message: err.message });
-});
+app.use((err, req, res, next) =>
+  res.status(err.cause || 500).json({ success: false, message: err.message })
+);
 
 app.listen(process.env.PORT || 5000, () =>
   console.log(`e-commerce app is running!`)

@@ -1,6 +1,6 @@
-const jwt = require("jsonwebtoken");
+import jwt from "jsonwebtoken";
 
-const { Token } = require("../models");
+import { Token } from "../models/index.js";
 
 const isAuthenticated = async (req, res, next) => {
   try {
@@ -55,4 +55,4 @@ const isAuthenticated = async (req, res, next) => {
   }
 };
 
-module.exports = isAuthenticated;
+export default isAuthenticated;

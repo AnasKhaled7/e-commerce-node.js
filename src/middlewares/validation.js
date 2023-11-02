@@ -15,4 +15,4 @@ const isValid = (schema) => {
   };
 };
 
-module.exports = isValid;
+export default isValid;

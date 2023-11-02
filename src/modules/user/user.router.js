@@ -1,8 +1,14 @@
-const router = require("express").Router();
+import { Router } from "express";
 
-const { isAuthorized, isAuthenticated, isValid } = require("../../middlewares");
-const userValidation = require("./user.validation");
-const userController = require("./user.controller");
+import {
+  isAuthenticated,
+  isAuthorized,
+  isValid,
+} from "../../middlewares/index.js";
+import * as userValidation from "./user.validation.js";
+import * as userController from "./user.controller.js";
+
+const router = Router();
 
 // logout
 router.patch("/logout", isAuthenticated, userController.logout);
@@ -24,4 +30,4 @@ router.get(
   userController.monthlyUsers
 );
 
-module.exports = router;
+export default router;

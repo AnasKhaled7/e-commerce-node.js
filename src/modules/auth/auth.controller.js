@@ -1,13 +1,13 @@
-const bcryptjs = require("bcryptjs");
-const cryptoJS = require("crypto-js");
-const jwt = require("jsonwebtoken");
-const crypto = require("crypto");
+import bcryptjs from "bcryptjs";
+import cryptoJS from "crypto-js";
+import jwt from "jsonwebtoken";
+import crypto from "crypto";
 
-const { User, Cart, Token } = require("../../models");
-const sendEmail = require("../../utils/sendEmail");
+import { User, Cart, Token } from "../../models/index.js";
+import sendEmail from "../../utils/sendEmail.js";
 
 // register
-const register = async (req, res) => {
+export const register = async (req, res) => {
   try {
     const { firstName, lastName, email, password, phone, gender } = req.body;
 
@@ -47,7 +47,7 @@ const register = async (req, res) => {
 };
 
 // login
-const login = async (req, res) => {
+export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -90,7 +90,7 @@ const login = async (req, res) => {
 };
 
 // send reset password code to email
-const sendResetPasswordCode = async (req, res) => {
+export const sendResetPasswordCode = async (req, res) => {
   try {
     const { email } = req.body;
 
@@ -121,7 +121,7 @@ const sendResetPasswordCode = async (req, res) => {
 };
 
 // reset password
-const resetPassword = async (req, res) => {
+export const resetPassword = async (req, res) => {
   try {
     const { email, code, password } = req.body;
 
@@ -151,11 +151,4 @@ const resetPassword = async (req, res) => {
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
-};
-
-module.exports = {
-  register,
-  login,
-  sendResetPasswordCode,
-  resetPassword,
 };

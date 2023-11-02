@@ -1,9 +1,9 @@
-const joi = require("joi");
+import joi from "joi";
 
-const { isValidObjectId } = require("../../utils/validation");
+import { isValidObjectId } from "../../utils/validation.js";
 
 // create category
-const createCategorySchema = joi
+export const createCategorySchema = joi
   .object({
     name: joi.string().trim().required(),
     description: joi.string().trim().required(),
@@ -11,7 +11,7 @@ const createCategorySchema = joi
   .required();
 
 // update category by id
-const updateCategorySchema = joi
+export const updateCategorySchema = joi
   .object({
     categoryId: joi.string().custom(isValidObjectId).required(),
     name: joi.string().trim(),
@@ -20,14 +20,8 @@ const updateCategorySchema = joi
   .required();
 
 // delete category by id
-const deleteCategorySchema = joi
+export const deleteCategorySchema = joi
   .object({
     categoryId: joi.string().custom(isValidObjectId).required(),
   })
   .required();
-
-module.exports = {
-  createCategorySchema,
-  updateCategorySchema,
-  deleteCategorySchema,
-};

@@ -1,7 +1,7 @@
-const joi = require("joi");
+import joi from "joi";
 
 // register
-const registerSchema = joi
+export const registerSchema = joi
   .object({
     firstName: joi.string().min(3).max(30).required(),
     lastName: joi.string().min(3).max(30).required(),
@@ -18,7 +18,7 @@ const registerSchema = joi
   .required();
 
 // login
-const loginSchema = joi
+export const loginSchema = joi
   .object({
     email: joi.string().email().required(),
     password: joi.string().min(6).max(30).required(),
@@ -26,14 +26,14 @@ const loginSchema = joi
   .required();
 
 // send reset password code to email
-const sendResetPasswordCodeSchema = joi
+export const sendResetPasswordCodeSchema = joi
   .object({
     email: joi.string().email().required(),
   })
   .required();
 
 // rest password
-const resetPasswordSchema = joi
+export const resetPasswordSchema = joi
   .object({
     email: joi.string().email().required(),
     code: joi.string().length(6).required(),
@@ -41,10 +41,3 @@ const resetPasswordSchema = joi
     confirmPassword: joi.string().valid(joi.ref("password")).required(),
   })
   .required();
-
-module.exports = {
-  registerSchema,
-  loginSchema,
-  sendResetPasswordCodeSchema,
-  resetPasswordSchema,
-};

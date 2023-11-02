@@ -1,10 +1,10 @@
-const multer = require("multer");
+import multer from "multer";
 
-const filter = {
+export const filter = {
   image: ["image/png", "image/jpeg"],
 };
 
-const upload = (filterArr) => {
+export const upload = (filterArr) => {
   const fileFilter = (req, file, cb) => {
     if (filterArr.includes(file.mimetype)) {
       return cb(null, true);
@@ -15,5 +15,3 @@ const upload = (filterArr) => {
 
   return multer({ storage: multer.diskStorage({}), fileFilter });
 };
-
-module.exports = { upload, filter };

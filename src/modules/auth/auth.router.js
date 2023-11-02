@@ -1,8 +1,10 @@
-const router = require("express").Router();
+import { Router } from "express";
 
-const { isValid } = require("../../middlewares");
-const authValidation = require("./auth.validation");
-const authController = require("./auth.controller");
+import { isValid } from "../../middlewares/index.js";
+import * as authValidation from "./auth.validation.js";
+import * as authController from "./auth.controller.js";
+
+const router = Router();
 
 // register
 router.post(
@@ -32,4 +34,4 @@ router.patch(
   authController.resetPassword
 );
 
-module.exports = router;
+export default router;

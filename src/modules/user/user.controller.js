@@ -1,7 +1,7 @@
-const { User, Token } = require("../../models");
+import { User, Token } from "../../models/index.js";
 
 // logout
-const logout = async (req, res) => {
+export const logout = async (req, res) => {
   try {
     // delete the token from the database
     await Token.deleteOne({ token: req.token, user: req.user._id });
@@ -16,7 +16,7 @@ const logout = async (req, res) => {
 };
 
 // block & unblock user by id
-const blockUser = async (req, res) => {
+export const blockUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.userId);
 
@@ -54,7 +54,7 @@ const blockUser = async (req, res) => {
 };
 
 // get the number of users registered monthly for last year
-const monthlyUsers = async (req, res) => {
+export const monthlyUsers = async (req, res) => {
   try {
     const date = new Date();
     const lastYear = new Date(date.setFullYear(date.getFullYear() - 1));
@@ -82,10 +82,4 @@ const monthlyUsers = async (req, res) => {
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
-};
-
-module.exports = {
-  logout,
-  blockUser,
-  monthlyUsers,
 };

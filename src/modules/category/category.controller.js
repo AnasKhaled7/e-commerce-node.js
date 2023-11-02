@@ -1,8 +1,8 @@
-const { Category } = require("../../models");
-const cloudinary = require("../../utils/cloud");
+import { Category } from "../../models/index.js";
+import cloudinary from "../../utils/cloud.js";
 
 // create category
-const createCategory = async (req, res) => {
+export const createCategory = async (req, res) => {
   try {
     // file
     if (!req.file)
@@ -35,7 +35,7 @@ const createCategory = async (req, res) => {
 };
 
 // get all categories
-const getCategories = async (req, res) => {
+export const getCategories = async (req, res) => {
   try {
     let { page, limit, search } = req.query;
 
@@ -97,7 +97,7 @@ const getCategories = async (req, res) => {
 };
 
 // get category by id
-const getCategory = async (req, res) => {
+export const getCategory = async (req, res) => {
   try {
     const category = await Category.findById(req.params.categoryId);
 
@@ -114,7 +114,7 @@ const getCategory = async (req, res) => {
 };
 
 // update category by id
-const updateCategory = async (req, res) => {
+export const updateCategory = async (req, res) => {
   try {
     const { name, description } = req.body;
 
@@ -159,7 +159,7 @@ const updateCategory = async (req, res) => {
 };
 
 // delete category by id
-const deleteCategory = async (req, res) => {
+export const deleteCategory = async (req, res) => {
   try {
     const category = await Category.findByIdAndDelete(req.params.categoryId);
 
@@ -176,12 +176,4 @@ const deleteCategory = async (req, res) => {
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
-};
-
-module.exports = {
-  createCategory,
-  getCategories,
-  getCategory,
-  updateCategory,
-  deleteCategory,
 };
