@@ -19,9 +19,9 @@ const UserSchema = new mongoose.Schema(
       url: {
         type: String,
         default:
-          "https://res.cloudinary.com/dlyllff3q/image/upload/v1693919199/e-commerce/user/default-profile_vl2nvl.png",
+          "https://res.cloudinary.com/dlyllff3q/image/upload/v1699112868/e-commerce/users/default-profile_bjvilu.png",
       },
-      id: { type: String, default: "e-commerce/user/default-profile_vl2nvl" },
+      id: { type: String, default: "e-commerce/users/default-profile_bjvilu" },
     },
     isBlocked: {
       status: { type: Boolean, default: false },
