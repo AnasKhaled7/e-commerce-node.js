@@ -29,21 +29,27 @@ app.use(express.json());
 
 // routes
 app.use("/api/v1/auth", authRouter);
-app.use("/api/v1/user", userRouter);
-app.use("/api/v1/category", categoryRouter);
-app.use("/api/v1/brand", brandRouter);
-app.use("/api/v1/product", productRouter);
-app.use("/api/v1/cart", cartRouter);
-app.use("/api/v1/order", orderRouter);
+app.use("/api/v1/users", userRouter);
+app.use("/api/v1/categories", categoryRouter);
+app.use("/api/v1/brands", brandRouter);
+app.use("/api/v1/products", productRouter);
+app.use("/api/v1/carts", cartRouter);
+app.use("/api/v1/orders", orderRouter);
 
 // not found
-app.all("*", (req, res) =>
-  res.status(404).json({ success: false, message: "Resource not found!" })
+app.all("*", (req, res, next) =>
+  next(
+    new Error(`Can't find ${req.originalUrl} on this server!`, { cause: 404 })
+  )
 );
 
 // error handler
 app.use((err, req, res, next) =>
-  res.status(err.cause || 500).json({ success: false, message: err.message })
+  res.status(err.cause || 500).json({
+    success: false,
+    message: err.message,
+    stack: process.env.NODE_ENV === "production" ? "" : err.stack,
+  })
 );
 
 app.listen(process.env.PORT || 5000, () =>
