@@ -1,179 +1,126 @@
 import { Category } from "../../models/index.js";
+import asyncHandler from "../../utils/asyncHandler.js";
 import cloudinary from "../../utils/cloud.js";
 
 // create category
-export const createCategory = async (req, res) => {
-  try {
-    // file
-    if (!req.file)
-      return res.status(400).json({ message: "Image is required" });
+export const createCategory = asyncHandler(async (req, res, next) => {
+  const { name } = req.body;
 
-    // check if the category is already exists
-    isCategoryExist = await Category.findOne({ name: req.body.name });
-    if (isCategoryExist)
-      return res
-        .status(409)
-        .json({ success: false, message: "Category already exists" });
+  // file
+  if (!req.file) return next(new Error("Image is required", { cause: 400 }));
 
-    // upload image to cloudinary
-    const { secure_url, public_id } = await cloudinary.uploader.upload(
-      req.file.path,
-      { folder: `${process.env.CLOUDINARY_FOLDER_NAME}/category` }
-    );
+  // check if the category is already exists
+  const isCategoryExist = await Category.findOne({ name });
+  if (isCategoryExist)
+    return next(new Error("Category already exists", { cause: 409 }));
 
-    // create category
-    const category = await Category.create({
-      name: req.body.name,
-      image: { url: secure_url, id: public_id },
-      user: req.user._id,
-    });
+  // upload image to cloudinary
+  const { secure_url, public_id } = await cloudinary.uploader.upload(
+    req.file.path,
+    { folder: `${process.env.CLOUDINARY_FOLDER_NAME}/categories` }
+  );
 
-    return res.status(201).json({ success: true, category });
-  } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
-  }
-};
+  // create category
+  const category = await Category.create({
+    name,
+    image: { url: secure_url, id: public_id },
+    user: req.user._id,
+  });
+
+  return res.status(201).json({
+    success: true,
+    message: "Category created successfully",
+    category,
+  });
+});
 
 // get all categories
-export const getCategories = async (req, res) => {
-  try {
-    let { page, limit, search } = req.query;
+export const getCategories = asyncHandler(async (req, res) => {
+  let { page, limit, search } = req.query;
 
-    page = !page || page < 1 || isNaN(page) ? 1 : page;
-    limit = !limit || limit < 1 || isNaN(limit) ? 20 : limit;
-    search = !search ? "" : search;
+  page = !page || page < 1 || isNaN(page) ? 1 : page;
+  limit = !limit || limit < 1 || isNaN(limit) ? 20 : limit;
+  search = !search ? "" : search;
 
-    const count = await Category.aggregate([
-      {
-        $match: {
-          name: { $regex: search, $options: "i" },
-        },
-      },
-    ]);
+  const count = await Category.aggregate([
+    { $match: { name: { $regex: search, $options: "i" } } },
+  ]);
 
-    const categories = await Category.aggregate([
-      {
-        $match: {
-          name: { $regex: search, $options: "i" },
-        },
-      },
-      {
-        $lookup: {
-          from: "users",
-          localField: "user",
-          foreignField: "_id",
-          as: "user",
-        },
-      },
-      { $unwind: "$user" },
-      { $sort: { createdAt: -1 } },
-      { $skip: (page - 1) * limit },
-      { $limit: Number(limit) },
-      {
-        $project: {
-          name: 1,
-          description: 1,
-          image: 1,
-          createdAt: 1,
-          user: {
-            _id: 1,
-            firstName: 1,
-            lastName: 1,
-          },
-        },
-      },
-    ]);
+  const categories = await Category.aggregate([
+    { $match: { name: { $regex: search, $options: "i" } } },
+    { $unwind: "$user" },
+    { $sort: { createdAt: -1 } },
+    { $skip: (page - 1) * limit },
+    { $limit: Number(limit) },
+    { $project: { name: 1, image: 1, createdAt: 1 } },
+  ]);
 
-    return res.status(200).json({
-      success: true,
-      current: page,
-      total: Math.ceil(count.length / limit),
-      numberOfCategories: count.length,
-      categories,
-    });
-  } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
-  }
-};
+  return res.status(200).json({
+    success: true,
+    current: page,
+    total: Math.ceil(count.length / limit),
+    numberOfCategories: count.length,
+    categories,
+  });
+});
 
 // get category by id
-export const getCategory = async (req, res) => {
-  try {
-    const category = await Category.findById(req.params.categoryId);
+export const getCategory = asyncHandler(async (req, res, next) => {
+  const category = await Category.findById(req.params.categoryId);
 
-    // check if the category is found
-    if (!category)
-      return res
-        .status(404)
-        .json({ success: false, message: "Category not found" });
+  // check if the category is found
+  if (!category) return next(new Error("Category not found", { cause: 404 }));
 
-    return res.status(200).json({ success: true, category });
-  } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
-  }
-};
+  return res.status(200).json({ success: true, category });
+});
 
 // update category by id
-export const updateCategory = async (req, res) => {
-  try {
-    const { name, description } = req.body;
+export const updateCategory = asyncHandler(async (req, res, next) => {
+  const { name } = req.body;
 
-    // check if body is empty
-    if (!name && !description && !req.file)
-      return res.status(400).json({ message: "Body is empty" });
+  // check if body is empty
+  if (!name && !req.file)
+    return next(new Error("Name or image is required", { cause: 400 }));
 
-    // check if the category is already exists
-    if (name) {
-      isCategoryExist = await Category.findOne({ name });
-      if (isCategoryExist)
-        return res
-          .status(409)
-          .json({ success: false, message: "Category already exists" });
-    }
+  // check if the category is found
+  const category = await Category.findById(req.params.categoryId);
+  if (!category) return next(new Error("Category not found", { cause: 404 }));
 
-    // update category
-    const category = await Category.findByIdAndUpdate(req.params.categoryId, {
-      name,
-      description,
+  // check if the category is already exists
+  if (name) {
+    isCategoryExist = await Category.findOne({ name });
+    if (isCategoryExist)
+      return next(new Error("Category already exists", { cause: 409 }));
+
+    category.name = name;
+  }
+
+  // file
+  if (req.file) {
+    const { secure_url } = await cloudinary.uploader.upload(req.file.path, {
+      public_id: category.image.id,
     });
 
-    // check if the category is found
-    if (!category)
-      return res
-        .status(404)
-        .json({ success: false, message: "Category not found" });
-
-    // file
-    if (req.file) {
-      const { secure_url } = await cloudinary.uploader.upload(req.file.path, {
-        public_id: category.image.id,
-      });
-      category.image.url = secure_url;
-      await category.save();
-    }
-
-    return res.status(200).json({ success: true, message: "Category updated" });
-  } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    category.image.url = secure_url;
   }
-};
+
+  await category.save();
+  return res
+    .status(200)
+    .json({ success: true, message: "Category updated successfully" });
+});
 
 // delete category by id
-export const deleteCategory = async (req, res) => {
-  try {
-    const category = await Category.findByIdAndDelete(req.params.categoryId);
+export const deleteCategory = asyncHandler(async (req, res, next) => {
+  const category = await Category.findByIdAndDelete(req.params.categoryId);
 
-    // check if the category is found
-    if (!category)
-      return res
-        .status(404)
-        .json({ success: false, message: "Category not found" });
+  // check if the category is found
+  if (!category) return next(new Error("Category not found", { cause: 404 }));
 
-    // delete image from cloudinary
-    await cloudinary.uploader.destroy(category.image.id);
+  // delete image from cloudinary
+  await cloudinary.uploader.destroy(category.image.id);
 
-    return res.status(200).json({ success: true, message: "Category deleted" });
-  } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
-  }
-};
+  return res
+    .status(200)
+    .json({ success: true, message: "Category deleted successfully" });
+});
