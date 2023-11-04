@@ -24,6 +24,7 @@ export const createBrand = asyncHandler(async (req, res, next) => {
   const brand = await Brand.create({
     name,
     image: { id: public_id, url: secure_url },
+    user: req.user._id,
   });
 
   return res
@@ -53,7 +54,6 @@ export const getBrands = asyncHandler(async (req, res) => {
 
   return res.status(200).json({
     success: true,
-    message: "Get all brands successfully",
     current: page,
     total: Math.ceil(count.length / limit),
     numberOfBrands: count.length,
@@ -63,9 +63,7 @@ export const getBrands = asyncHandler(async (req, res) => {
 
 // get brand by id
 export const getBrand = asyncHandler(async (req, res, next) => {
-  const { brandId } = req.params;
-
-  const brand = await Brand.findById(brandId);
+  const brand = await Brand.findById(req.params.brandId);
 
   if (!brand) return next(new Error("Brand not found", { cause: 404 }));
 
@@ -93,10 +91,10 @@ export const updateBrand = asyncHandler(async (req, res, next) => {
     brand.name = name;
   }
 
-  // upload image to cloudinary
+  // file
   if (req.file) {
     const { secure_url } = await cloudinary.uploader.upload(req.file.path, {
-      public_id: category.image.id,
+      public_id: brand.image.id,
     });
 
     brand.image.url = secure_url;
@@ -110,11 +108,12 @@ export const updateBrand = asyncHandler(async (req, res, next) => {
 
 // delete brand by id
 export const deleteBrand = asyncHandler(async (req, res, next) => {
-  const { brandId } = req.params;
-
-  const brand = await Brand.findByIdAndDelete(brandId);
+  const brand = await Brand.findByIdAndDelete(req.params.brandId);
 
   if (!brand) return next(new Error("Brand not found", { cause: 404 }));
+
+  // delete image from cloudinary
+  await cloudinary.uploader.destroy(brand.image.id);
 
   return res
     .status(200)
