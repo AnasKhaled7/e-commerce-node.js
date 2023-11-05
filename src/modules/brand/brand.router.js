@@ -28,7 +28,7 @@ router.get("/", brandController.getBrands);
 router.get("/:brandId", brandController.getBrand);
 
 // update brand by id
-router.put(
+router.patch(
   "/:brandId",
   isAuthenticated,
   isAuthorized(["admin", "manager"]),

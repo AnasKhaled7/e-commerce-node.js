@@ -2,7 +2,9 @@ import { Brand } from "../../models/index.js";
 import cloudinary from "../../utils/cloud.js";
 import asyncHandler from "../../utils/asyncHandler.js";
 
-// create brand
+// @desc    Create brand
+// @route   POST /api/brands
+// @access  Private/Admin/Manager
 export const createBrand = asyncHandler(async (req, res, next) => {
   const { name } = req.body;
 
@@ -17,7 +19,7 @@ export const createBrand = asyncHandler(async (req, res, next) => {
   // upload image to cloudinary
   const { secure_url, public_id } = await cloudinary.uploader.upload(
     req.file.path,
-    { folder: `${process.env.CLOUDINARY_FOLDER_NAME}/products/${name}` }
+    { folder: `${process.env.CLOUDINARY_FOLDER_NAME}/brands` }
   );
 
   // create brand
@@ -32,7 +34,9 @@ export const createBrand = asyncHandler(async (req, res, next) => {
     .json({ success: true, message: "Brand created successfully", brand });
 });
 
-// get all brands
+// @desc    Get all brands
+// @route   GET /api/brands
+// @access  Public
 export const getBrands = asyncHandler(async (req, res) => {
   let { page, limit, search } = req.query;
 
@@ -61,7 +65,9 @@ export const getBrands = asyncHandler(async (req, res) => {
   });
 });
 
-// get brand by id
+// @desc    Get brand by id
+// @route   GET /api/brands/:brandId
+// @access  Public
 export const getBrand = asyncHandler(async (req, res, next) => {
   const brand = await Brand.findById(req.params.brandId);
 
@@ -70,7 +76,9 @@ export const getBrand = asyncHandler(async (req, res, next) => {
   return res.status(200).json({ success: true, brand });
 });
 
-// update brand by id
+// @desc    Update brand by id
+// @route   PATCH /api/brands/:brandId
+// @access  Private/Admin/Manager
 export const updateBrand = asyncHandler(async (req, res, next) => {
   const { name } = req.body;
 
@@ -103,10 +111,12 @@ export const updateBrand = asyncHandler(async (req, res, next) => {
   await brand.save();
   return res
     .status(200)
-    .json({ success: true, message: "Brand updated successfully" });
+    .json({ success: true, message: "Brand updated successfully", brand });
 });
 
-// delete brand by id
+// @desc    Delete brand by id
+// @route   DELETE /api/brands/:brandId
+// @access  Private/Admin/Manager
 export const deleteBrand = asyncHandler(async (req, res, next) => {
   const brand = await Brand.findByIdAndDelete(req.params.brandId);
 
