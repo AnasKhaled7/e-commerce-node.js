@@ -1,9 +1,69 @@
 import { Router } from "express";
 
-// import { isValid } from "../../middlewares/index.js";
-// import * as productValidation from "./product.validation.js";
-// import * as productController from "./product.controller.js";
+import {
+  isAuthenticated,
+  isAuthorized,
+  isValid,
+} from "../../middlewares/index.js";
+import { upload, filter } from "../../utils/multer.js";
+import * as productValidation from "./product.validation.js";
+import * as productController from "./product.controller.js";
 
 const router = Router();
+
+// create product
+router.post(
+  "/",
+  isAuthenticated,
+  isAuthorized(["admin", "manager"]),
+  upload(filter.image).fields([
+    { name: "defaultImage", maxCount: 1 },
+    { name: "images", maxCount: 6 },
+  ]),
+  isValid(productValidation.createProductSchema),
+  productController.createProduct
+);
+
+// get all products
+router.get("/", productController.getProducts);
+
+// get product by id
+router.get("/:productId", productController.getProduct);
+
+// get products by category
+router.get(
+  "/category/:category",
+  isValid(productValidation.getProductsByCategorySchema),
+  productController.getProductsByCategory
+);
+
+// get products by brand
+router.get(
+  "/brand/:brand",
+  isValid(productValidation.getProductsByBrandSchema),
+  productController.getProductsByBrand
+);
+
+// update product by id
+router.patch(
+  "/:productId",
+  isAuthenticated,
+  isAuthorized(["admin", "manager"]),
+  upload(filter.image).fields([
+    { name: "defaultImage", maxCount: 1 },
+    { name: "images", maxCount: 6 },
+  ]),
+  isValid(productValidation.updateProductSchema),
+  productController.updateProduct
+);
+
+// delete product by id
+router.delete(
+  "/:productId",
+  isAuthenticated,
+  isAuthorized(["admin", "manager"]),
+  isValid(productValidation.deleteProductSchema),
+  productController.deleteProduct
+);
 
 export default router;
