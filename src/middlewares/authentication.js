@@ -1,58 +1,29 @@
 import jwt from "jsonwebtoken";
 
-import { Token } from "../models/index.js";
+import { User } from "../models/index.js";
+import asyncHandler from "../utils/asyncHandler.js";
 
-const isAuthenticated = async (req, res, next) => {
-  try {
-    let token = req.headers.authorization;
-    // check token existence
-    if (
-      !token ||
-      !token.startsWith("Bearer ") ||
-      token.split(" ")[1] === "null"
-    )
-      return res
-        .status(401)
-        .json({ success: false, message: "Access token not valid" });
+const isAuthenticated = asyncHandler(async (req, res, next) => {
+  let token;
+  token = req.cookies.token;
 
-    // get token from header
-    token = token.split(" ")[1];
+  if (!token) return next(new Error("Access token not found", { cause: 401 }));
 
-    // check token existence
-    const tokenDoc = await Token.findOne({ token });
-    if (!tokenDoc)
-      return res
-        .status(401)
-        .json({ success: false, message: "Access token not valid" });
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // check token isValid & expireAt date & user
-    if (!tokenDoc.isValid || new Date() > tokenDoc.expireAt)
-      return res
-        .status(401)
-        .json({ success: false, message: "Access token not valid" });
+  if (!decoded)
+    return next(new Error("Access token not valid", { cause: 401 }));
 
-    // verify token
-    const decode = jwt.verify(token, process.env.JWT_SECRET);
+  const user = await User.findById(decoded.userId).select("-password -__v");
 
-    if (!decode)
-      return res
-        .status(401)
-        .json({ success: false, message: "Access token not valid" });
+  if (!user) return next(new Error("User not found", { cause: 404 }));
 
-    // check user
-    if (tokenDoc.user.toString() !== decode._id)
-      return res
-        .status(401)
-        .json({ success: false, message: "Access token not valid" });
+  // check if the user is blocked
+  if (user.isBlocked.status)
+    return next(new Error("Your account is blocked", { cause: 403 }));
 
-    // attach user and token to req
-    req.user = decode;
-    req.token = token;
-
-    return next();
-  } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
-  }
-};
+  req.user = user;
+  next();
+});
 
 export default isAuthenticated;
