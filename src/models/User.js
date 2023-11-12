@@ -1,4 +1,6 @@
 import mongoose from "mongoose";
+import bcrypt from "bcryptjs";
+import cryptoJS from "crypto-js";
 
 // schema
 const UserSchema = new mongoose.Schema(
@@ -54,6 +56,30 @@ const UserSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// methods
+UserSchema.methods.matchPassword = async function (password) {
+  return await bcrypt.compare(password, this.password);
+};
+
+// hooks
+UserSchema.pre("save", async function (next) {
+  // hash password
+  if (this.isModified("password")) {
+    const salt = await bcrypt.genSalt(Number(process.env.SALT_ROUND));
+    this.password = await bcrypt.hash(this.password, salt);
+  }
+
+  // encrypt phone number
+  if (this.isModified("phone")) {
+    this.phone = cryptoJS.AES.encrypt(
+      this.phone,
+      process.env.ENCRYPTION_KEY
+    ).toString();
+  }
+
+  next();
+});
 
 // model
 const User = mongoose.models.User || mongoose.model("User", UserSchema);
