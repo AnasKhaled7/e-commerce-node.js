@@ -9,7 +9,7 @@ import sendEmail from "../../utils/sendEmail.js";
 // @route    POST /api/v1/auth/register
 // @access   Public
 export const register = asyncHandler(async (req, res, next) => {
-  const { firstName, lastName, email, password, phone, gender } = req.body;
+  const { firstName, lastName, email, password } = req.body;
 
   // check user existence
   const isUserExist = await User.findOne({ email });
@@ -17,14 +17,7 @@ export const register = asyncHandler(async (req, res, next) => {
     return next(new Error("User already exists", { cause: 409 }));
 
   // create user
-  const user = await User.create({
-    firstName,
-    lastName,
-    email,
-    password,
-    phone,
-    gender,
-  });
+  const user = await User.create({ firstName, lastName, email, password });
 
   // create cart
   await Cart.create({ user: user._id });

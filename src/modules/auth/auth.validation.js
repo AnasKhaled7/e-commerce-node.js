@@ -6,14 +6,8 @@ export const registerSchema = joi
     firstName: joi.string().min(3).max(30).required(),
     lastName: joi.string().min(3).max(30).required(),
     email: joi.string().email().required(),
-    password: joi.string().min(6).max(50).required(),
+    password: joi.string().min(6).max(40).required(),
     confirmPassword: joi.string().valid(joi.ref("password")).required(),
-    phone: joi
-      .string()
-      .length(11)
-      .regex(/^01[0-2,5]{1}[0-9]{8}$/)
-      .required(),
-    gender: joi.string().valid("m", "f").required(),
   })
   .required();
 
@@ -21,7 +15,7 @@ export const registerSchema = joi
 export const loginSchema = joi
   .object({
     email: joi.string().email().required(),
-    password: joi.string().min(6).max(30).required(),
+    password: joi.string().min(6).max(40).required(),
   })
   .required();
 
@@ -37,7 +31,7 @@ export const resetPasswordSchema = joi
   .object({
     email: joi.string().email().required(),
     code: joi.string().length(6).required(),
-    password: joi.string().min(6).max(50).required(),
+    password: joi.string().min(6).max(40).required(),
     confirmPassword: joi.string().valid(joi.ref("password")).required(),
   })
   .required();
