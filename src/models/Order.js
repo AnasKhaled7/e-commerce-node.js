@@ -1,9 +1,10 @@
 import mongoose from "mongoose";
+import cryptoJS from "crypto-js";
 
 // schema
 const OrderSchema = new mongoose.Schema(
   {
-    user: { type: mongoose.Types.ObjectId, ref: "User", required: true },
+    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     orderItems: [
       {
         _id: false,
@@ -13,40 +14,21 @@ const OrderSchema = new mongoose.Schema(
           required: true,
         },
         name: { type: String, required: true },
-        quantity: { type: Number, default: 1 },
+        image: { type: String, required: true },
         price: { type: Number, required: true },
-        image: {
-          id: { type: String, required: true },
-          url: { type: String, required: true },
-        },
+        quantity: { type: Number, default: 1 },
       },
     ],
     shippingAddress: {
+      address: { type: String, required: true },
       city: { type: String, required: true },
-      street: { type: String, required: true },
-      building: { type: String, required: true },
-      floor: { type: String },
-      apartment: { type: String },
-      label: {
-        type: String,
-        lowercase: true,
-        required: true,
-        default: "home",
-        enum: ["home", "work", "other"],
-      },
+      postalCode: { type: String, required: true },
+      phone: { type: String, required: true },
     },
-    phone: { type: String, required: true },
-    paymentMethod: {
+    status: {
       type: String,
-      lowercase: true,
-      default: "cash",
-      enum: ["cash", "card"],
-    },
-    paymentResult: {
-      id: String,
-      status: String,
-      update_time: String,
-      email_address: String,
+      enum: ["pending", "processing", "delivered"],
+      default: "pending",
     },
     itemsPrice: { type: Number, default: 0.0 },
     taxPrice: { type: Number, default: 0.0 },
@@ -59,6 +41,27 @@ const OrderSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// hooks
+OrderSchema.pre("save", function (next) {
+  // encrypt phone number
+  this.shippingAddress.phone = cryptoJS.AES.encrypt(
+    this.shippingAddress.phone,
+    process.env.ENCRYPTION_KEY
+  ).toString();
+
+  next();
+});
+
+OrderSchema.post("save", function (doc, next) {
+  // decrypt phone number
+  doc.shippingAddress.phone = cryptoJS.AES.decrypt(
+    doc.shippingAddress.phone,
+    process.env.ENCRYPTION_KEY
+  ).toString(cryptoJS.enc.Utf8);
+
+  next();
+});
 
 // model
 const Order = mongoose.models.Order || mongoose.model("Order", OrderSchema);
