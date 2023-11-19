@@ -2,6 +2,20 @@ import joi from "joi";
 
 import { isValidObjectId } from "../../utils/validation.js";
 
+// set shipping address & phone number for user
+export const setShippingAddressSchema = joi
+  .object({
+    address: joi.string().required(),
+    city: joi.string().required(),
+    postalCode: joi.string().required(),
+    phone: joi
+      .string()
+      .length(11)
+      .regex(/^01[0-2,5]{1}[0-9]{8}$/)
+      .required(),
+  })
+  .required();
+
 // update user profile
 export const updateProfileSchema = joi
   .object({

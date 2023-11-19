@@ -15,6 +15,29 @@ export const logout = asyncHandler(async (req, res, next) => {
     .json({ success: true, message: "Logged out successfully" });
 });
 
+// @desc     Set shipping address & phone number for user
+// @route    PATCH /api/v1/users/shipping-address
+// @access   Private
+export const setShippingAddress = asyncHandler(async (req, res, next) => {
+  const user = await User.findById(req.user._id);
+
+  // update user
+  user.shippingAddress.address = req.body.address;
+  user.shippingAddress.city = req.body.city;
+  user.shippingAddress.postalCode = req.body.postalCode;
+
+  // encrypt phone number
+  const encryptedPhone = user.encryptPhoneNumber(req.body.phone);
+
+  user.phone = encryptedPhone;
+
+  await user.save();
+
+  return res
+    .status(200)
+    .json({ success: true, message: "Shipping address updated successfully" });
+});
+
 // @desc     Get user profile
 // @route    GET /api/v1/users/profile
 // @access   Private
