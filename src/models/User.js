@@ -15,7 +15,7 @@ const UserSchema = new mongoose.Schema(
       required: true,
     },
     password: { type: String, required: true },
-    phone: { type: String },
+    phone: { type: String, required: true },
     isBlocked: {
       status: { type: Boolean, default: false },
       reason: { type: String },
@@ -28,6 +28,7 @@ const UserSchema = new mongoose.Schema(
     },
     resetPasswordCode: String,
     shippingAddress: {
+      _id: false,
       address: { type: String },
       city: { type: String },
       postalCode: { type: String },
@@ -41,10 +42,6 @@ UserSchema.methods.matchPassword = async function (password) {
   return await bcrypt.compare(password, this.password);
 };
 
-UserSchema.methods.encryptPhoneNumber = function (phone) {
-  return cryptoJS.AES.encrypt(phone, process.env.ENCRYPTION_KEY).toString();
-};
-
 // hooks
 UserSchema.pre("save", async function (next) {
   // hash password
@@ -52,6 +49,24 @@ UserSchema.pre("save", async function (next) {
     const salt = await bcrypt.genSalt(Number(process.env.SALT_ROUND));
     this.password = await bcrypt.hash(this.password, salt);
   }
+
+  // encrypt phone number
+  if (this.isModified("phone")) {
+    this.phone = cryptoJS.AES.encrypt(
+      this.phone,
+      process.env.ENCRYPTION_KEY
+    ).toString();
+  }
+
+  next();
+});
+
+UserSchema.post("save", async function (doc, next) {
+  // decrypt phone number
+  doc.phone = cryptoJS.AES.decrypt(
+    doc.phone,
+    process.env.ENCRYPTION_KEY
+  ).toString(cryptoJS.enc.Utf8);
 
   next();
 });
