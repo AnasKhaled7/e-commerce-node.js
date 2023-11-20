@@ -34,9 +34,8 @@ export const createOrder = asyncHandler(async (req, res, next) => {
 // @route     GET /api/v1/orders/my-orders
 // @access    Private
 export const getMyOrders = asyncHandler(async (req, res, next) => {
-  const orders = await Order.find({ user: req.user.orderId });
-
-  res.status(200).json({ success: true, orders });
+  const orders = await Order.find({ user: req.user._id });
+  res.status(200).json(orders);
 });
 
 // @desc      Get order by id
