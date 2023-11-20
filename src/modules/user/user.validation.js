@@ -2,27 +2,17 @@ import joi from "joi";
 
 import { isValidObjectId } from "../../utils/validation.js";
 
-// set shipping address & phone number for user
-export const setShippingAddressSchema = joi
-  .object({
-    address: joi.string().required(),
-    city: joi.string().required(),
-    postalCode: joi.string().required(),
-    phone: joi
-      .string()
-      .length(11)
-      .regex(/^01[0-2,5]{1}[0-9]{8}$/)
-      .required(),
-  })
-  .required();
-
 // update user profile
 export const updateProfileSchema = joi
   .object({
     firstName: joi.string().min(3).max(30),
     lastName: joi.string().min(3).max(30),
     email: joi.string().email().trim(),
-    password: joi.string().min(6).max(50),
+    password: joi.string().min(6).max(40),
+    confirmPassword: joi.string().valid(joi.ref("password")),
+    address: joi.string(),
+    city: joi.string(),
+    postalCode: joi.string(),
     phone: joi
       .string()
       .length(11)

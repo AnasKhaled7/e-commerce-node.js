@@ -15,59 +15,51 @@ export const logout = asyncHandler(async (req, res, next) => {
     .json({ success: true, message: "Logged out successfully" });
 });
 
-// @desc     Set shipping address & phone number for user
-// @route    PATCH /api/v1/users/shipping-address
-// @access   Private
-export const setShippingAddress = asyncHandler(async (req, res, next) => {
-  const user = await User.findById(req.user._id);
-
-  // update user
-  user.shippingAddress.address = req.body.address;
-  user.shippingAddress.city = req.body.city;
-  user.shippingAddress.postalCode = req.body.postalCode;
-
-  // encrypt phone number
-  const encryptedPhone = user.encryptPhoneNumber(req.body.phone);
-
-  user.phone = encryptedPhone;
-
-  await user.save();
-
-  return res
-    .status(200)
-    .json({ success: true, message: "Shipping address updated successfully" });
-});
-
-// @desc     Get user profile
-// @route    GET /api/v1/users/profile
-// @access   Private
-export const getProfile = asyncHandler(async (req, res, next) => {
-  const user = await User.findById(req.user._id).select("-password -__v");
-
-  if (!user) return next(new Error("User not found", { cause: 404 }));
-
-  return res.status(200).json({ success: true, user });
-});
-
 // @desc     Update user profile
 // @route    PATCH /api/v1/users/profile
 // @access   Private
 export const updateProfile = asyncHandler(async (req, res, next) => {
+  const {
+    email,
+    password,
+    phone,
+    firstName,
+    lastName,
+    address,
+    city,
+    postalCode,
+  } = req.body;
+
+  // check if body is empty
+  if (Object.keys(req.body).length === 0)
+    return next(new Error("Please provide data to update", { cause: 400 }));
+
   const user = await User.findById(req.user._id);
-  if (!user) return next(new Error("User not found", { cause: 404 }));
 
   // update user
-  user.firstName = req.body.firstName || user.firstName;
-  user.lastName = req.body.lastName || user.lastName;
-  user.email = req.body.email || user.email;
-  if (req.body.password) user.password = req.body.password;
-  if (req.body.phone) user.phone = req.body.phone;
+  if (email) {
+    // check if the email is already taken
+    const isEmailExist = await User.findOne({ email });
+    if (isEmailExist)
+      return next(new Error("Email is already taken", { cause: 409 }));
+    user.email = email;
+  }
+  if (password) user.password = password;
+  user.phone = phone || user.phone;
+  user.firstName = firstName || user.firstName;
+  user.lastName = lastName || user.lastName;
+
+  user.shippingAddress.address = address || user.shippingAddress.address;
+  user.shippingAddress.city = city || user.shippingAddress.city;
+  user.shippingAddress.postalCode =
+    postalCode || user.shippingAddress.postalCode;
 
   await user.save();
 
-  return res
-    .status(200)
-    .json({ success: true, message: "User updated successfully" });
+  // return user data without password and __v fields
+  const { password: userPassword, __v, ...userData } = user._doc;
+
+  return res.status(200).json(userData);
 });
 
 // @desc     Block & unblock user by id

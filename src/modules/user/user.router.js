@@ -13,17 +13,6 @@ const router = Router();
 // logout
 router.post("/logout", isAuthenticated, userController.logout);
 
-// set shipping address
-router.patch(
-  "/shipping-address",
-  isAuthenticated,
-  isValid(userValidation.setShippingAddressSchema),
-  userController.setShippingAddress
-);
-
-// get user profile
-router.get("/profile", isAuthenticated, userController.getProfile);
-
 // update user profile
 router.patch(
   "/profile",
