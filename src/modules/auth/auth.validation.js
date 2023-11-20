@@ -8,6 +8,11 @@ export const registerSchema = joi
     email: joi.string().email().required(),
     password: joi.string().min(6).max(40).required(),
     confirmPassword: joi.string().valid(joi.ref("password")).required(),
+    phone: joi
+      .string()
+      .length(11)
+      .regex(/^01[0-2,5]{1}[0-9]{8}$/)
+      .required(),
   })
   .required();
 

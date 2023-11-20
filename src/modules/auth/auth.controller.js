@@ -9,7 +9,7 @@ import sendEmail from "../../utils/sendEmail.js";
 // @route    POST /api/v1/auth/register
 // @access   Public
 export const register = asyncHandler(async (req, res, next) => {
-  const { firstName, lastName, email, password } = req.body;
+  const { firstName, lastName, email, password, phone } = req.body;
 
   // check user existence
   const isUserExist = await User.findOne({ email });
@@ -17,7 +17,13 @@ export const register = asyncHandler(async (req, res, next) => {
     return next(new Error("User already exists", { cause: 409 }));
 
   // create user
-  const user = await User.create({ firstName, lastName, email, password });
+  const user = await User.create({
+    firstName,
+    lastName,
+    email,
+    password,
+    phone,
+  });
 
   // create cart
   await Cart.create({ user: user._id });
@@ -25,13 +31,10 @@ export const register = asyncHandler(async (req, res, next) => {
   // generate token
   generateToken(res, user._id);
 
-  return res.status(201).json({
-    _id: user._id,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    email: user.email,
-    role: user.role,
-  });
+  // return user data without password and __v fields
+  const { password: userPassword, __v, ...userData } = user._doc;
+
+  return res.status(201).json(userData);
 });
 
 // @desc     Login
@@ -51,13 +54,10 @@ export const login = asyncHandler(async (req, res, next) => {
   // generate token
   generateToken(res, user._id);
 
-  return res.status(200).json({
-    _id: user._id,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    email: user.email,
-    role: user.role,
-  });
+  // return user data without password and __v fields
+  const { password: userPassword, __v, ...userData } = user._doc;
+
+  return res.status(200).json(userData);
 });
 
 // @desc     Send reset password code to email
