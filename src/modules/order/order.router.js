@@ -1,10 +1,6 @@
 import { Router } from "express";
 
-import {
-  isAuthenticated,
-  isAuthorized,
-  isValid,
-} from "../../middlewares/index.js";
+import { isAuthenticated, isAdmin, isValid } from "../../middlewares/index.js";
 import * as orderValidation from "./order.validation.js";
 import * as orderController from "./order.controller.js";
 
@@ -36,17 +32,12 @@ router.patch(
 router.patch(
   "/:orderId/deliver",
   isAuthenticated,
-  isAuthorized(["admin", "manager"]),
+  isAdmin,
   isValid(orderValidation.updateOrderToDeliveredSchema),
   orderController.updateOrderToDelivered
 );
 
 // get all orders
-router.get(
-  "/",
-  isAuthenticated,
-  isAuthorized(["admin", "manager"]),
-  orderController.getAllOrders
-);
+router.get("/", isAuthenticated, isAdmin, orderController.getAllOrders);
 
 export default router;

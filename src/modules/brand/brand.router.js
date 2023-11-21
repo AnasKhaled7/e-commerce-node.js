@@ -1,10 +1,6 @@
 import { Router } from "express";
 
-import {
-  isAuthenticated,
-  isAuthorized,
-  isValid,
-} from "../../middlewares/index.js";
+import { isAuthenticated, isAdmin, isValid } from "../../middlewares/index.js";
 import { upload, filter } from "../../utils/multer.js";
 import * as brandValidation from "./brand.validation.js";
 import * as brandController from "./brand.controller.js";
@@ -15,7 +11,7 @@ const router = Router();
 router.post(
   "/",
   isAuthenticated,
-  isAuthorized(["admin", "manager"]),
+  isAdmin,
   upload(filter.image).single("image"),
   isValid(brandValidation.createBrandSchema),
   brandController.createBrand
@@ -31,7 +27,7 @@ router.get("/:brandId", brandController.getBrand);
 router.patch(
   "/:brandId",
   isAuthenticated,
-  isAuthorized(["admin", "manager"]),
+  isAdmin,
   upload(filter.image).single("image"),
   isValid(brandValidation.updateBrandSchema),
   brandController.updateBrand
@@ -41,7 +37,7 @@ router.patch(
 router.delete(
   "/:brandId",
   isAuthenticated,
-  isAuthorized(["admin", "manager"]),
+  isAdmin,
   isValid(brandValidation.deleteBrandSchema),
   brandController.deleteBrand
 );

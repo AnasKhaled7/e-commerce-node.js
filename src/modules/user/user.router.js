@@ -1,10 +1,6 @@
 import { Router } from "express";
 
-import {
-  isAuthenticated,
-  isAuthorized,
-  isValid,
-} from "../../middlewares/index.js";
+import { isAuthenticated, isAdmin, isValid } from "../../middlewares/index.js";
 import * as userValidation from "./user.validation.js";
 import * as userController from "./user.controller.js";
 
@@ -25,7 +21,7 @@ router.patch(
 router.patch(
   "/block/:userId",
   isAuthenticated,
-  isAuthorized(["manager", "admin"]),
+  isAdmin,
   isValid(userValidation.blockUserSchema),
   userController.blockUser
 );
@@ -34,23 +30,18 @@ router.patch(
 router.get(
   "/monthly-users",
   isAuthenticated,
-  isAuthorized(["manager"]),
+  isAdmin,
   userController.monthlyUsers
 );
 
 // get all users
-router.get(
-  "/",
-  isAuthenticated,
-  isAuthorized(["manager"]),
-  userController.getUsers
-);
+router.get("/", isAuthenticated, isAdmin, userController.getUsers);
 
 // get user by id
 router.get(
   "/:userId",
   isAuthenticated,
-  isAuthorized(["manager"]),
+  isAdmin,
   isValid(userValidation.getUserSchema),
   userController.getUserById
 );
@@ -59,7 +50,7 @@ router.get(
 router.patch(
   "/:userId",
   isAuthenticated,
-  isAuthorized(["manager"]),
+  isAdmin,
   isValid(userValidation.updateUserSchema),
   userController.updateUserById
 );
@@ -68,7 +59,7 @@ router.patch(
 router.delete(
   "/:userId",
   isAuthenticated,
-  isAuthorized(["manager"]),
+  isAdmin,
   isValid(userValidation.deleteUserSchema),
   userController.deleteUserById
 );

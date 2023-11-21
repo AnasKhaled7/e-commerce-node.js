@@ -1,10 +1,6 @@
 import { Router } from "express";
 
-import {
-  isAuthenticated,
-  isAuthorized,
-  isValid,
-} from "../../middlewares/index.js";
+import { isAuthenticated, isAdmin, isValid } from "../../middlewares/index.js";
 import { upload, filter } from "../../utils/multer.js";
 import * as productValidation from "./product.validation.js";
 import * as productController from "./product.controller.js";
@@ -15,7 +11,7 @@ const router = Router();
 router.post(
   "/",
   isAuthenticated,
-  isAuthorized(["admin", "manager"]),
+  isAdmin,
   upload(filter.image).fields([
     { name: "defaultImage", maxCount: 1 },
     { name: "images", maxCount: 6 },
@@ -48,7 +44,7 @@ router.get(
 router.patch(
   "/:productId",
   isAuthenticated,
-  isAuthorized(["admin", "manager"]),
+  isAdmin,
   upload(filter.image).fields([
     { name: "defaultImage", maxCount: 1 },
     { name: "images", maxCount: 6 },
@@ -61,7 +57,7 @@ router.patch(
 router.delete(
   "/:productId",
   isAuthenticated,
-  isAuthorized(["admin", "manager"]),
+  isAdmin,
   isValid(productValidation.deleteProductSchema),
   productController.deleteProduct
 );

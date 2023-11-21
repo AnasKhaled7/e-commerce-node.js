@@ -20,12 +20,7 @@ const UserSchema = new mongoose.Schema(
       status: { type: Boolean, default: false },
       reason: { type: String },
     },
-    role: {
-      type: String,
-      lowercase: true,
-      enum: ["user", "admin", "manager"],
-      default: "user",
-    },
+    isAdmin: { type: Boolean, default: false },
     resetPasswordCode: String,
     shippingAddress: {
       _id: false,

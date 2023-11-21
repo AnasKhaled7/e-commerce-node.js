@@ -1,10 +1,6 @@
 import { Router } from "express";
 
-import {
-  isAuthenticated,
-  isAuthorized,
-  isValid,
-} from "../../middlewares/index.js";
+import { isAuthenticated, isAdmin, isValid } from "../../middlewares/index.js";
 import { upload, filter } from "../../utils/multer.js";
 import * as categoryValidation from "./category.validation.js";
 import * as categoryController from "./category.controller.js";
@@ -15,7 +11,7 @@ const router = Router();
 router.post(
   "/",
   isAuthenticated,
-  isAuthorized(["admin", "manager"]),
+  isAdmin,
   upload(filter.image).single("image"),
   isValid(categoryValidation.createCategorySchema),
   categoryController.createCategory
@@ -31,7 +27,7 @@ router.get("/:categoryId", categoryController.getCategory);
 router.put(
   "/:categoryId",
   isAuthenticated,
-  isAuthorized(["admin", "manager"]),
+  isAdmin,
   upload(filter.image).single("image"),
   isValid(categoryValidation.updateCategorySchema),
   categoryController.updateCategory
@@ -41,7 +37,7 @@ router.put(
 router.delete(
   "/:categoryId",
   isAuthenticated,
-  isAuthorized(["admin", "manager"]),
+  isAdmin,
   isValid(categoryValidation.updateCategorySchema),
   categoryController.deleteCategory
 );

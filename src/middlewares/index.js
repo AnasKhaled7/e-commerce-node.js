@@ -1,5 +1,5 @@
 import isValid from "./validation.js";
 import isAuthenticated from "./authentication.js";
-import isAuthorized from "./authorization.js";
+import isAdmin from "./admin.js";
 
-export { isValid, isAuthenticated, isAuthorized };
+export { isValid, isAuthenticated, isAdmin };
