@@ -6,16 +6,10 @@ const productSchema = new mongoose.Schema(
     user: { type: mongoose.Types.ObjectId, ref: "User", required: true },
     name: { type: String, unique: true, required: true },
     description: { type: String, required: true },
-    defaultImage: {
+    image: {
       id: { type: String, required: true },
       url: { type: String, required: true },
     },
-    images: [
-      {
-        id: { type: String, required: true },
-        url: { type: String, required: true },
-      },
-    ],
     category: {
       type: mongoose.Types.ObjectId,
       ref: "Category",
