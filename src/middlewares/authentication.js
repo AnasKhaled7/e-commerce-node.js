@@ -23,7 +23,7 @@ const isAuthenticated = asyncHandler(async (req, res, next) => {
     return next(new Error("Your account is blocked", { cause: 403 }));
 
   req.user = user;
-  next();
+  return next();
 });
 
 export default isAuthenticated;
