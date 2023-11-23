@@ -31,6 +31,7 @@ export const register = asyncHandler(async (req, res, next) => {
 
   // return user data without password and __v fields
   const { password, __v, ...userData } = user._doc;
+  userData.phone = user.decryptPhone();
   return res.status(201).json(userData);
 });
 
@@ -51,6 +52,7 @@ export const login = asyncHandler(async (req, res, next) => {
 
   // return user data without password and __v fields
   const { password, __v, ...userData } = user._doc;
+  userData.phone = user.decryptPhone();
   return res.status(200).json(userData);
 });
 

@@ -56,15 +56,12 @@ UserSchema.pre("save", async function (next) {
   next();
 });
 
-UserSchema.post("save", async function (doc, next) {
-  // decrypt phone number
-  doc.phone = cryptoJS.AES.decrypt(
-    doc.phone,
-    process.env.ENCRYPTION_KEY
-  ).toString(cryptoJS.enc.Utf8);
-
-  next();
-});
+// methods
+UserSchema.methods.decryptPhone = function () {
+  return cryptoJS.AES.decrypt(this.phone, process.env.ENCRYPTION_KEY).toString(
+    cryptoJS.enc.Utf8
+  );
+};
 
 // model
 const User = mongoose.models.User || mongoose.model("User", UserSchema);
