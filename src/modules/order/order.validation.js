@@ -22,16 +22,14 @@ export const createOrderSchema = joi
         address: joi.string().required(),
         city: joi.string().required(),
         postalCode: joi.string().required(),
-        phone: joi
-          .string()
-          .length(11)
-          .regex(/^01[0-2,5]{1}[0-9]{8}$/)
-          .required(),
       })
       .required(),
-    paymentMethod: joi.string().valid("cash", "card").required(),
+    phone: joi
+      .string()
+      .length(11)
+      .regex(/^01[0-2,5]{1}[0-9]{8}$/)
+      .required(),
     itemsPrice: joi.number().required(),
-    taxPrice: joi.number().required(),
     shippingPrice: joi.number().required(),
     totalPrice: joi.number().required(),
   })
@@ -41,14 +39,6 @@ export const createOrderSchema = joi
 export const updateOrderToPaidSchema = joi
   .object({
     orderId: joi.string().custom(isValidObjectId).required(),
-    paymentResult: joi
-      .object({
-        id: joi.string().required(),
-        status: joi.string().required(),
-        update_time: joi.string().required(),
-        email_address: joi.string().required(),
-      })
-      .required(),
   })
   .required();
 

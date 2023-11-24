@@ -24,6 +24,7 @@ router.get("/:orderId", isAuthenticated, orderController.getOrderById);
 router.patch(
   "/:orderId/pay",
   isAuthenticated,
+  isAdmin,
   isValid(orderValidation.updateOrderToPaidSchema),
   orderController.updateOrderToPaid
 );

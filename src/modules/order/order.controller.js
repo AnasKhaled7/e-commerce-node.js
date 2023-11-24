@@ -5,26 +5,17 @@ import asyncHandler from "../../utils/asyncHandler.js";
 // @route     POST /api/v1/orders
 // @access    Private
 export const createOrder = asyncHandler(async (req, res, next) => {
-  const {
-    orderItems,
-    shippingAddress,
-    itemsPrice,
-    taxPrice,
-    shippingPrice,
-    totalPrice,
-  } = req.body;
-
-  if (orderItems.length === 0)
+  if (req.body.orderItems.length === 0)
     return next(new Error("No order items", { cause: 400 }));
 
   const order = await Order.create({
     user: req.user.id,
-    orderItems,
-    shippingAddress,
-    itemsPrice,
-    taxPrice,
-    shippingPrice,
-    totalPrice,
+    orderItems: req.body.orderItems,
+    shippingAddress: req.body.shippingAddress,
+    itemsPrice: req.body.itemsPrice,
+    shippingPrice: req.body.shippingPrice,
+    phone: req.body.phone,
+    totalPrice: req.body.totalPrice,
   });
 
   res.status(201).json({ success: true, order });
@@ -53,10 +44,10 @@ export const getOrderById = asyncHandler(async (req, res, next) => {
 });
 
 // @desc      Update order to paid
-// @route     PATCH /api/v1/orders/:id/pay
-// @access    Private
+// @route     PATCH /api/v1/orders/:orderId/pay
+// @access    Private/Admin
 export const updateOrderToPaid = asyncHandler(async (req, res, next) => {
-  const order = await Order.findById(req.params.id);
+  const order = await Order.findById(req.params.orderId);
 
   if (!order) return next(new Error("Order not found", { cause: 404 }));
 
@@ -69,14 +60,15 @@ export const updateOrderToPaid = asyncHandler(async (req, res, next) => {
 });
 
 // @desc      Update order to delivered
-// @route     PATCH /api/v1/orders/:id/deliver
-// @access    Private (admin, manager)
+// @route     PATCH /api/v1/orders/:orderId/deliver
+// @access    Private/Admin
 export const updateOrderToDelivered = asyncHandler(async (req, res, next) => {
-  const order = await Order.findById(req.params.id);
+  const order = await Order.findById(req.params.orderId);
 
   if (!order) return next(new Error("Order not found", { cause: 404 }));
 
   order.isDelivered = true;
+  order.status = "delivered";
   order.deliveredAt = Date.now();
 
   await order.save();
@@ -86,9 +78,26 @@ export const updateOrderToDelivered = asyncHandler(async (req, res, next) => {
 
 // @desc      Get all orders
 // @route     GET /api/v1/orders
-// @access    Private (admin, manager)
+// @access    Private/Admin
 export const getAllOrders = asyncHandler(async (req, res, next) => {
-  const orders = await Order.find({}).populate("user", "id firstName lastName");
+  let { page, limit } = req.query;
 
-  res.status(200).json({ success: true, orders });
+  page = !page || page < 1 || isNaN(page) ? 1 : page;
+  limit = !limit || limit < 1 || isNaN(limit) ? 20 : limit;
+
+  const orders = await Order.find()
+    .populate("user", "firstName lastName email")
+    .limit(limit * 1)
+    .skip((page - 1) * limit)
+    .exec();
+
+  const count = await Order.countDocuments();
+
+  res.status(200).json({
+    success: true,
+    orders,
+    numberOfOrders: count,
+    totalPages: Math.ceil(count / limit),
+    currentPage: page,
+  });
 });
