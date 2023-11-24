@@ -58,8 +58,8 @@ export const updateProfile = asyncHandler(async (req, res, next) => {
 
   // return user data without password and __v fields
   const { password: userPassword, __v, ...userData } = user._doc;
-
-  return res.status(200).json(userData);
+  userData.phone = user.decryptPhone();
+  return res.status(201).json(userData);
 });
 
 // @desc     Block & unblock user by id
