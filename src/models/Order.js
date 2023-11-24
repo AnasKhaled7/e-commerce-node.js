@@ -19,20 +19,19 @@ const OrderSchema = new mongoose.Schema(
         quantity: { type: Number, default: 1 },
       },
     ],
+    phone: { type: String, required: true },
     shippingAddress: {
       _id: false,
       address: { type: String, required: true },
       city: { type: String, required: true },
       postalCode: { type: String, required: true },
-      phone: { type: String, required: true },
     },
     status: {
       type: String,
-      enum: ["pending", "processing", "delivered"],
+      enum: ["pending", "processing", "delivered", "cancelled"],
       default: "pending",
     },
     itemsPrice: { type: Number, default: 0.0 },
-    taxPrice: { type: Number, default: 0.0 },
     shippingPrice: { type: Number, default: 0.0 },
     totalPrice: { type: Number, default: 0.0 },
     isPaid: { type: Boolean, default: false },
@@ -44,25 +43,24 @@ const OrderSchema = new mongoose.Schema(
 );
 
 // hooks
-OrderSchema.pre("save", function (next) {
+OrderSchema.pre("save", async function (next) {
   // encrypt phone number
-  this.shippingAddress.phone = cryptoJS.AES.encrypt(
-    this.shippingAddress.phone,
-    process.env.ENCRYPTION_KEY
-  ).toString();
+  if (this.isModified("phone")) {
+    this.phone = cryptoJS.AES.encrypt(
+      this.phone,
+      process.env.ENCRYPTION_KEY
+    ).toString();
+  }
 
   next();
 });
 
-OrderSchema.post("save", function (doc, next) {
-  // decrypt phone number
-  doc.shippingAddress.phone = cryptoJS.AES.decrypt(
-    doc.shippingAddress.phone,
-    process.env.ENCRYPTION_KEY
-  ).toString(cryptoJS.enc.Utf8);
-
-  next();
-});
+// methods
+OrderSchema.methods.decryptPhone = function () {
+  return cryptoJS.AES.decrypt(this.phone, process.env.ENCRYPTION_KEY).toString(
+    cryptoJS.enc.Utf8
+  );
+};
 
 // model
 const Order = mongoose.models.Order || mongoose.model("Order", OrderSchema);
