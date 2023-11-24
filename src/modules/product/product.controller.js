@@ -4,57 +4,42 @@ import cloudinary from "../../utils/cloud.js";
 
 // @desc      Create product
 // @route     POST /api/v1/products
-// @access    Private/Admin/Manager
+// @access    Private/Admin
 export const createProduct = asyncHandler(async (req, res, next) => {
-  const { name, description, category, brand, price, countInStock, discount } =
-    req.body;
-
-  // files
-  if (!req.files) return next(new Error("Images are required", { cause: 400 }));
+  // file
+  if (!req.file) return next(new Error("Image is required", { cause: 400 }));
 
   // check if the product is already exists
-  const isProductExist = await Product.findOne({ name });
+  const isProductExist = await Product.findOne({ name: req.body.name });
   if (isProductExist)
     return next(new Error("Product already exists", { cause: 409 }));
 
   // check if category exists
-  const isCategoryExist = await Category.findById(category);
+  const isCategoryExist = await Category.findById(req.body.category);
   if (!isCategoryExist)
     return next(new Error("Category not found", { cause: 404 }));
 
   // check if brand exists
-  const isBrandExist = await Brand.findById(brand);
+  const isBrandExist = await Brand.findById(req.body.brand);
   if (!isBrandExist) return next(new Error("Brand not found", { cause: 404 }));
 
-  // upload default image
+  // upload image to cloudinary
   const { secure_url, public_id } = await cloudinary.uploader.upload(
-    req.files.defaultImage[0].path,
-    { folder: `${process.env.CLOUDINARY_FOLDER_NAME}/products/${name}` }
+    req.file.path,
+    { folder: `${process.env.CLOUDINARY_FOLDER_NAME}/products` }
   );
-
-  // upload images
-  let images = [];
-  for (const file of req.files.images) {
-    const { secure_url, public_id } = await cloudinary.uploader.upload(
-      file.path,
-      { folder: `${process.env.CLOUDINARY_FOLDER_NAME}/products/${name}` }
-    );
-
-    images.push({ id: public_id, url: secure_url });
-  }
 
   // create product
   const product = await Product.create({
     user: req.user._id,
-    name,
-    description,
-    defaultImage: { id: public_id, url: secure_url },
-    images,
-    category,
-    brand,
-    price,
-    countInStock,
-    discount,
+    name: req.body.name,
+    description: req.body.description,
+    image: { id: public_id, url: secure_url },
+    category: req.body.category,
+    brand: req.body.brand,
+    price: req.body.price,
+    countInStock: req.body.countInStock,
+    discount: req.body.discount,
   });
 
   return res.status(201).json({ success: true, product });
@@ -100,7 +85,7 @@ export const getProducts = asyncHandler(async (req, res, next) => {
     {
       $project: {
         name: 1,
-        defaultImage: 1,
+        image: 1,
         category: { _id: 1, name: 1 },
         brand: { _id: 1, name: 1 },
         price: 1,
@@ -188,7 +173,7 @@ export const getProductsByCategory = asyncHandler(async (req, res, next) => {
     {
       $project: {
         name: 1,
-        defaultImage: 1,
+        image: 1,
         category: { _id: 1, name: 1 },
         brand: { _id: 1, name: 1 },
         price: 1,
@@ -265,7 +250,7 @@ export const getProductsByBrand = asyncHandler(async (req, res, next) => {
     {
       $project: {
         name: 1,
-        defaultImage: 1,
+        image: 1,
         category: { _id: 1, name: 1 },
         brand: { _id: 1, name: 1 },
         price: 1,
@@ -290,14 +275,14 @@ export const getProductsByBrand = asyncHandler(async (req, res, next) => {
 
 // @desc      Update product by id
 // @route     PATCH /api/v1/products/:productId
-// @access    Private/Admin/Manager
+// @access    Private/Admin
 export const updateProduct = asyncHandler(async (req, res, next) => {
   const { productId } = req.params;
   const { name, description, category, brand, price, countInStock, discount } =
     req.body;
 
   // check if body is empty & no files
-  if (Object.keys(req.body).length === 0 && req.files.length === 0)
+  if (Object.keys(req.body).length === 0 || req.file)
     return next(new Error("Nothing to update", { cause: 400 }));
 
   // check if the product exists
@@ -310,7 +295,7 @@ export const updateProduct = asyncHandler(async (req, res, next) => {
     if (isProductNameExist)
       return next(new Error("Product name already exists", { cause: 409 }));
 
-    // product.name = name;
+    product.name = name;
   }
 
   // check if category exists
@@ -331,46 +316,13 @@ export const updateProduct = asyncHandler(async (req, res, next) => {
     product.brand = brand;
   }
 
-  product.name = name ? name : product.name;
+  // file
+  if (req.file) {
+    const { secure_url } = await cloudinary.uploader.upload(req.file.path, {
+      public_id: category.image.id,
+    });
 
-  // check if default image is uploaded
-  if (req.files.defaultImage) {
-    // upload default image
-    const { secure_url, public_id } = await cloudinary.uploader.upload(
-      req.files.defaultImage[0].path,
-      {
-        folder: `${process.env.CLOUDINARY_FOLDER_NAME}/products/${product.name}`,
-      }
-    );
-
-    // delete old default image from cloudinary
-    await cloudinary.uploader.destroy(product.defaultImage.id);
-
-    // save new default image to product
-    product.defaultImage = { id: public_id, url: secure_url };
-  }
-
-  // check if images are uploaded
-  let images = [];
-  if (req.files.images) {
-    // upload images
-    for (const file of req.files.images) {
-      const { secure_url, public_id } = await cloudinary.uploader.upload(
-        file.path,
-        {
-          folder: `${process.env.CLOUDINARY_FOLDER_NAME}/products/${product.name}`,
-        }
-      );
-      images.push({ id: public_id, url: secure_url });
-    }
-
-    // delete old images from cloudinary
-    for (const image of product.images) {
-      await cloudinary.uploader.destroy(image.id);
-    }
-
-    // save new images to product
-    product.images = images;
+    product.image.url = secure_url;
   }
 
   // update product
@@ -387,17 +339,14 @@ export const updateProduct = asyncHandler(async (req, res, next) => {
 
 // @desc      Delete product by id
 // @route     DELETE /api/v1/products/:productId
-// @access    Private/Admin/Manager
+// @access    Private/Admin
 export const deleteProduct = asyncHandler(async (req, res, next) => {
   const product = await Product.findByIdAndDelete(req.params.productId);
 
   if (!product) return next(new Error("Product not found", { cause: 404 }));
 
   // delete images from cloudinary
-  await cloudinary.uploader.destroy(product.defaultImage.id);
-
-  for (const image of product.images)
-    await cloudinary.uploader.destroy(image.id);
+  await cloudinary.uploader.destroy(product.image.id);
 
   return res
     .status(200)

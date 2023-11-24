@@ -12,10 +12,7 @@ router.post(
   "/",
   isAuthenticated,
   isAdmin,
-  upload(filter.image).fields([
-    { name: "defaultImage", maxCount: 1 },
-    { name: "images", maxCount: 6 },
-  ]),
+  upload(filter.image).single("image"),
   isValid(productValidation.createProductSchema),
   productController.createProduct
 );
@@ -45,10 +42,7 @@ router.patch(
   "/:productId",
   isAuthenticated,
   isAdmin,
-  upload(filter.image).fields([
-    { name: "defaultImage", maxCount: 1 },
-    { name: "images", maxCount: 6 },
-  ]),
+  upload(filter.image).single("image"),
   isValid(productValidation.updateProductSchema),
   productController.updateProduct
 );
