@@ -11,6 +11,9 @@
   "keywords": [],
   "author": "Anas Khaled",
   "license": "ISC",
+  "engines": {
+    "node": "18.16.1"
+  },
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cloudinary": "^1.41.0",
