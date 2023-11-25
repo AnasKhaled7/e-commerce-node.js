@@ -1,8 +1,8 @@
+import jwt from "jsonwebtoken";
 import crypto from "crypto";
 
-import { User, Cart } from "../../models/index.js";
+import { User, Cart, Token } from "../../models/index.js";
 import asyncHandler from "../../utils/asyncHandler.js";
-import generateToken from "../../utils/generateToken.js";
 import sendEmail from "../../utils/sendEmail.js";
 
 // @desc     Register
@@ -26,13 +26,9 @@ export const register = asyncHandler(async (req, res, next) => {
   // create cart
   await Cart.create({ user: user._id });
 
-  // generate token
-  generateToken(res, user._id);
-
-  // return user data without password and __v fields
-  const { password, __v, ...userData } = user._doc;
-  userData.phone = user.decryptPhone();
-  return res.status(201).json(userData);
+  return res
+    .status(201)
+    .json({ success: true, message: "User account created successfully" });
 });
 
 // @desc     Login
@@ -48,12 +44,20 @@ export const login = asyncHandler(async (req, res, next) => {
   if (!isMatch) return next(new Error("Invalid credentials", { cause: 400 }));
 
   // generate token
-  generateToken(res, user._id);
+  const token = jwt.sign(
+    {
+      userId: user._id,
+      email: user.email,
+      isAdmin: user.isAdmin,
+      firstName: user.firstName,
+      lastName: user.lastName,
+    },
+    process.env.JWT_SECRET
+  );
 
-  // return user data without password and __v fields
-  const { password, __v, ...userData } = user._doc;
-  userData.phone = user.decryptPhone();
-  return res.status(200).json(userData);
+  await Token.create({ user: user._id, token });
+
+  return res.status(200).json({ success: true, token });
 });
 
 // @desc     Send reset password code to email
@@ -98,6 +102,9 @@ export const resetPassword = asyncHandler(async (req, res, next) => {
   user.password = req.body.password;
   user.resetPasswordCode = undefined;
   await user.save();
+
+  // delete all tokens
+  await Token.deleteMany({ user: user._id });
 
   return res.status(200).json({ success: true, message: "Password reset" });
 });

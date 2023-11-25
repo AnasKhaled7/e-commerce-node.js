@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+
 // schema
 const CategorySchema = new mongoose.Schema(
   {

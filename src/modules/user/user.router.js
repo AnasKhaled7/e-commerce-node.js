@@ -6,6 +6,9 @@ import * as userController from "./user.controller.js";
 
 const router = Router();
 
+// get user profile
+router.get("/profile", isAuthenticated, userController.getProfile);
+
 // logout
 router.post("/logout", isAuthenticated, userController.logout);
 

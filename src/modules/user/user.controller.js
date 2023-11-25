@@ -1,14 +1,21 @@
-import { User } from "../../models/index.js";
+import { Token, User } from "../../models/index.js";
 import asyncHandler from "../../utils/asyncHandler.js";
+
+// @desc     Get user profile
+// @route    GET /api/v1/users/profile
+// @access   Private
+export const getProfile = asyncHandler(async (req, res, next) => {
+  const user = await User.findById(req.user._id).select("-password -__v");
+  user.phone = user.decryptPhone();
+  return res.status(200).json({ success: true, user });
+});
 
 // @desc     Logout
 // @route    PATCH /api/v1/users/logout
 // @access   Private
 export const logout = asyncHandler(async (req, res, next) => {
-  res.cookie("token", "", {
-    httpOnly: true,
-    expires: new Date(Date.now()),
-  });
+  // delete token from database
+  await Token.findOneAndDelete({ token: req.token });
 
   return res
     .status(200)
@@ -64,7 +71,7 @@ export const updateProfile = asyncHandler(async (req, res, next) => {
 
 // @desc     Block & unblock user by id
 // @route    PATCH /api/v1/users/block/:userId
-// @access   Private (admin, manager)
+// @access   Private/Admin
 export const blockUser = asyncHandler(async (req, res, next) => {
   const user = await User.findById(req.params.userId);
 
@@ -97,7 +104,7 @@ export const blockUser = asyncHandler(async (req, res, next) => {
 
 // @desc     Get the number of users registered monthly for last year
 // @route    GET /api/v1/users/monthly-users
-// @access   Private (manager)
+// @access   Private/Admin
 export const monthlyUsers = asyncHandler(async (req, res, next) => {
   const date = new Date();
   const lastYear = new Date(date.setFullYear(date.getFullYear() - 1));
@@ -126,7 +133,7 @@ export const monthlyUsers = asyncHandler(async (req, res, next) => {
 
 // @desc     Get all users
 // @route    GET /api/v1/users
-// @access   Private (manager)
+// @access   Private/Admin
 export const getUsers = asyncHandler(async (req, res, next) => {
   const users = await User.find().select("-password");
 
@@ -135,7 +142,7 @@ export const getUsers = asyncHandler(async (req, res, next) => {
 
 // @desc     Get user by id
 // @route    GET /api/v1/users/:userId
-// @access   Private (manager)
+// @access   Private/Admin
 export const getUserById = asyncHandler(async (req, res, next) => {
   const user = await User.findById(req.params.userId).select("-password");
 
@@ -146,7 +153,7 @@ export const getUserById = asyncHandler(async (req, res, next) => {
 
 // @desc     Delete user by id
 // @route    DELETE /api/v1/users/:userId
-// @access   Private (manager)
+// @access   Private/Admin
 export const deleteUserById = asyncHandler(async (req, res, next) => {
   const user = await User.findByIdAndDelete(req.params.userId);
 
@@ -157,7 +164,7 @@ export const deleteUserById = asyncHandler(async (req, res, next) => {
 
 // @desc     Update user by id
 // @route    PATCH /api/v1/users/:userId
-// @access   Private (manager)
+// @access   Private/Admin
 export const updateUserById = asyncHandler(async (req, res, next) => {
   res.send("update user by id");
 });

@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 // schema
-const brandSchema = new mongoose.Schema(
+const BrandSchema = new mongoose.Schema(
   {
     user: { type: mongoose.Types.ObjectId, ref: "User", required: true },
     name: { type: String, unique: true, required: true },
@@ -14,6 +14,6 @@ const brandSchema = new mongoose.Schema(
 );
 
 // model
-const Brand = mongoose.models.Brand || mongoose.model("Brand", brandSchema);
+const Brand = mongoose.models.Brand || mongoose.model("Brand", BrandSchema);
 
 export default Brand;
