@@ -63,10 +63,9 @@ export const updateProfile = asyncHandler(async (req, res, next) => {
 
   await user.save();
 
-  // return user data without password and __v fields
-  const { password: userPassword, __v, ...userData } = user._doc;
-  userData.phone = user.decryptPhone();
-  return res.status(201).json(userData);
+  user.phone = user.decryptPhone();
+  const { password: userPassword, __v, ...userInfo } = user._doc;
+  return res.status(200).json({ success: true, userInfo });
 });
 
 // @desc     Block & unblock user by id

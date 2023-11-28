@@ -57,7 +57,9 @@ export const login = asyncHandler(async (req, res, next) => {
 
   await Token.create({ user: user._id, token });
 
-  return res.status(200).json({ success: true, token });
+  user.phone = user.decryptPhone();
+  const { password, __v, ...userInfo } = user._doc;
+  return res.status(200).json({ success: true, token, userInfo });
 });
 
 // @desc     Send reset password code to email
