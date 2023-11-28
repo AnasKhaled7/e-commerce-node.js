@@ -25,7 +25,21 @@ export const createOrder = asyncHandler(async (req, res, next) => {
 // @route     GET /api/v1/orders/my-orders
 // @access    Private
 export const getMyOrders = asyncHandler(async (req, res, next) => {
-  const orders = await Order.find({ user: req.user._id });
+  const orders = await Order.aggregate([
+    {
+      $match: {
+        user: req.user._id,
+      },
+    },
+    { $sort: { createdAt: -1 } },
+    {
+      $project: {
+        totalPrice: 1,
+        status: 1,
+        createdAt: 1,
+      },
+    },
+  ]);
   res.status(200).json(orders);
 });
 
