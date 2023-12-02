@@ -30,7 +30,7 @@ export const createProduct = asyncHandler(async (req, res, next) => {
   );
 
   // create product
-  const product = await Product.create({
+  await Product.create({
     user: req.user._id,
     name: req.body.name,
     description: req.body.description,
@@ -42,7 +42,7 @@ export const createProduct = asyncHandler(async (req, res, next) => {
     discount: req.body.discount,
   });
 
-  return res.status(201).json({ success: true, product });
+  return res.status(201).json({ success: true });
 });
 
 // @desc      Get all products
@@ -92,18 +92,16 @@ export const getProducts = asyncHandler(async (req, res, next) => {
         countInStock: 1,
         rating: 1,
         numReviews: 1,
-        sold: 1,
         discount: 1,
-        createdAt: 1,
       },
     },
   ]);
 
   return res.status(200).json({
     success: true,
-    current: page,
-    total: Math.ceil(count.length / limit),
-    numberOfProducts: count.length,
+    page,
+    pages: Math.ceil(count.length / limit),
+    numOfProducts: count.length,
     products,
   });
 });
@@ -112,7 +110,10 @@ export const getProducts = asyncHandler(async (req, res, next) => {
 // @route     GET /api/v1/products/:productId
 // @access    Public
 export const getProduct = asyncHandler(async (req, res, next) => {
-  const product = await Product.findById(req.params.productId);
+  const product = await Product.findById(req.params.productId).populate([
+    { path: "category", select: "name" },
+    { path: "brand", select: "name" },
+  ]);
 
   if (!product) return next(new Error("Product not found", { cause: 404 }));
 
@@ -180,18 +181,16 @@ export const getProductsByCategory = asyncHandler(async (req, res, next) => {
         countInStock: 1,
         rating: 1,
         numReviews: 1,
-        sold: 1,
         discount: 1,
-        createdAt: 1,
       },
     },
   ]);
 
   return res.status(200).json({
     success: true,
-    current: page,
-    total: Math.ceil(count.length / limit),
-    numberOfProducts: count.length,
+    page,
+    pages: Math.ceil(count.length / limit),
+    numOfProducts: count.length,
     products,
   });
 });
@@ -257,18 +256,16 @@ export const getProductsByBrand = asyncHandler(async (req, res, next) => {
         countInStock: 1,
         rating: 1,
         numReviews: 1,
-        sold: 1,
         discount: 1,
-        createdAt: 1,
       },
     },
   ]);
 
   return res.status(200).json({
     success: true,
-    current: page,
-    total: Math.ceil(count.length / limit),
-    numberOfProducts: count.length,
+    page,
+    pages: Math.ceil(count.length / limit),
+    numOfProducts: count.length,
     products,
   });
 });
@@ -277,16 +274,15 @@ export const getProductsByBrand = asyncHandler(async (req, res, next) => {
 // @route     PATCH /api/v1/products/:productId
 // @access    Private/Admin
 export const updateProduct = asyncHandler(async (req, res, next) => {
-  const { productId } = req.params;
   const { name, description, category, brand, price, countInStock, discount } =
     req.body;
 
-  // check if body is empty & no files
-  if (Object.keys(req.body).length === 0 || req.file)
+  // check if body is empty
+  if (Object.keys(req.body).length === 0)
     return next(new Error("Nothing to update", { cause: 400 }));
 
   // check if the product exists
-  const product = await Product.findById(productId);
+  const product = await Product.findById(req.params.productId);
   if (!product) return next(new Error("Product not found", { cause: 404 }));
 
   // check if the product name is already exists
@@ -316,15 +312,6 @@ export const updateProduct = asyncHandler(async (req, res, next) => {
     product.brand = brand;
   }
 
-  // file
-  if (req.file) {
-    const { secure_url } = await cloudinary.uploader.upload(req.file.path, {
-      public_id: category.image.id,
-    });
-
-    product.image.url = secure_url;
-  }
-
   // update product
   product.description = description ? description : product.description;
   product.price = price ? price : product.price;
@@ -335,6 +322,32 @@ export const updateProduct = asyncHandler(async (req, res, next) => {
   return res
     .status(200)
     .json({ success: true, message: "Product updated successfully", product });
+});
+
+// @desc      Update product image by id
+// @route     PATCH /api/v1/products/:productId/image
+// @access    Private/Admin
+export const updateProductImage = asyncHandler(async (req, res, next) => {
+  // check if no file
+  if (!req.file) return next(new Error("Image is required", { cause: 400 }));
+
+  // check if the product exists
+  const product = await Product.findById(req.params.productId);
+  if (!product) return next(new Error("Product not found", { cause: 404 }));
+
+  // upload image to cloudinary
+  const { secure_url } = await cloudinary.uploader.upload(req.file.path, {
+    public_id: product.image.id,
+  });
+
+  product.image.url = secure_url;
+
+  // update product
+  await product.save();
+
+  return res
+    .status(200)
+    .json({ success: true, message: "Product image updated successfully" });
 });
 
 // @desc      Delete product by id

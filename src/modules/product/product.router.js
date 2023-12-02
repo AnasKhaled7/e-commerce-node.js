@@ -42,9 +42,17 @@ router.patch(
   "/:productId",
   isAuthenticated,
   isAdmin,
-  upload(filter.image).single("image"),
   isValid(productValidation.updateProductSchema),
   productController.updateProduct
+);
+
+// update product image by id
+router.patch(
+  "/:productId/image",
+  isAuthenticated,
+  isAdmin,
+  upload(filter.image).single("image"),
+  productController.updateProductImage
 );
 
 // delete product by id
