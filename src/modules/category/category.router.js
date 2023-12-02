@@ -20,6 +20,9 @@ router.post(
 // get all categories
 router.get("/", categoryController.getCategories);
 
+// get categories names
+router.get("/names", categoryController.getCategoriesNames);
+
 // get category by id
 router.get("/:categoryId", categoryController.getCategory);
 

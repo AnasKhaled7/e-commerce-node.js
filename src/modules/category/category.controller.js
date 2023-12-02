@@ -66,6 +66,14 @@ export const getCategories = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc      Get all categories names
+// @route     GET /api/v1/categories/names
+// @access    Public
+export const getCategoriesNames = asyncHandler(async (req, res) => {
+  const categories = await Category.find().select("name");
+  return res.status(200).json({ success: true, categories });
+});
+
 // @desc      Get category by id
 // @route     GET /api/v1/categories/:categoryId
 // @access    Public
