@@ -20,6 +20,9 @@ router.post(
 // get all brands
 router.get("/", brandController.getBrands);
 
+// get brands names
+router.get("/names", brandController.getBrandsNames);
+
 // get brand by id
 router.get("/:brandId", brandController.getBrand);
 

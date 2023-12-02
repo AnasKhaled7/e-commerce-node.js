@@ -65,6 +65,14 @@ export const getBrands = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    Get all brands name
+// @route   GET /api/brands/names
+// @access  Public
+export const getBrandsNames = asyncHandler(async (req, res) => {
+  const brands = await Brand.find().select("name");
+  return res.status(200).json({ success: true, brands });
+});
+
 // @desc    Get brand by id
 // @route   GET /api/brands/:brandId
 // @access  Public
