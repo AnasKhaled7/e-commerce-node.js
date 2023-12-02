@@ -6,11 +6,9 @@ export const filter = {
 
 export const upload = (filterArr) => {
   const fileFilter = (req, file, cb) => {
-    if (filterArr.includes(file.mimetype)) {
-      return cb(null, true);
-    } else {
-      return cb(new Error("Invalid file type", { cause: 400 }), false);
-    }
+    return filterArr.includes(file.mimetype)
+      ? cb(null, true)
+      : cb(new Error("Invalid file type", { cause: 400 }), false);
   };
 
   return multer({ storage: multer.diskStorage({}), fileFilter });
