@@ -20,15 +20,6 @@ router.patch(
   userController.updateProfile
 );
 
-// block & unblock user by id
-router.patch(
-  "/block/:userId",
-  isAuthenticated,
-  isAdmin,
-  isValid(userValidation.blockUserSchema),
-  userController.blockUser
-);
-
 // get the number of users registered monthly for last year
 router.get(
   "/monthly-users",
@@ -38,33 +29,39 @@ router.get(
 );
 
 // get all users
-router.get("/", isAuthenticated, isAdmin, userController.getUsers);
+router.get(
+  "/",
+  isAuthenticated,
+  isAdmin,
+  isValid(userValidation.getUsersSchema),
+  userController.getUsers
+);
 
 // get user by id
 router.get(
   "/:userId",
   isAuthenticated,
   isAdmin,
-  isValid(userValidation.getUserSchema),
+  isValid(userValidation.userIdSchema),
   userController.getUserById
 );
 
-// update user by id
+// block user by id
 router.patch(
-  "/:userId",
+  "/block/:userId",
   isAuthenticated,
   isAdmin,
-  isValid(userValidation.updateUserSchema),
-  userController.updateUserById
+  isValid(userValidation.blockUserSchema),
+  userController.blockUser
 );
 
-// delete user by id
-router.delete(
-  "/:userId",
+// unblock user by id
+router.patch(
+  "/unblock/:userId",
   isAuthenticated,
   isAdmin,
-  isValid(userValidation.deleteUserSchema),
-  userController.deleteUserById
+  isValid(userValidation.userIdSchema),
+  userController.unblockUser
 );
 
 export default router;

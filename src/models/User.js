@@ -19,6 +19,7 @@ const UserSchema = new mongoose.Schema(
     isBlocked: {
       status: { type: Boolean, default: false },
       reason: { type: String },
+      date: { type: Date },
     },
     isAdmin: { type: Boolean, default: false },
     resetPasswordCode: String,
@@ -31,11 +32,6 @@ const UserSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
-// methods
-UserSchema.methods.matchPassword = async function (password) {
-  return await bcrypt.compare(password, this.password);
-};
 
 // hooks
 UserSchema.pre("save", async function (next) {
@@ -57,6 +53,10 @@ UserSchema.pre("save", async function (next) {
 });
 
 // methods
+UserSchema.methods.matchPassword = async function (password) {
+  return await bcrypt.compare(password, this.password);
+};
+
 UserSchema.methods.decryptPhone = function () {
   return cryptoJS.AES.decrypt(this.phone, process.env.ENCRYPTION_KEY).toString(
     cryptoJS.enc.Utf8

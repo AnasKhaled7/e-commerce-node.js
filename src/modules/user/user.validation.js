@@ -20,27 +20,26 @@ export const updateProfileSchema = joi
   })
   .required();
 
-// block & unblock user by id
+// get all users
+export const getUsersSchema = joi
+  .object({
+    page: joi.number(),
+    limit: joi.number(),
+    search: joi.string(),
+  })
+  .required();
+
+// get user by id & unblock user by id
+export const userIdSchema = joi
+  .object({
+    userId: joi.string().custom(isValidObjectId).required(),
+  })
+  .required();
+
+// block user by id
 export const blockUserSchema = joi
   .object({
     userId: joi.string().custom(isValidObjectId).required(),
-    reason: joi.string().trim(),
+    reason: joi.string().trim().required(),
   })
   .required();
-
-// get user by id
-export const getUserSchema = joi
-  .object({
-    userId: joi.string().custom(isValidObjectId).required(),
-  })
-  .required();
-
-// delete user by id
-export const deleteUserSchema = joi
-  .object({
-    userId: joi.string().custom(isValidObjectId).required(),
-  })
-  .required();
-
-// update user by id
-export const updateUserSchema = joi.object({}).required();

@@ -11,7 +11,7 @@ export const getProfile = asyncHandler(async (req, res, next) => {
 });
 
 // @desc     Logout
-// @route    PATCH /api/v1/users/logout
+// @route    POST /api/v1/users/logout
 // @access   Private
 export const logout = asyncHandler(async (req, res, next) => {
   // delete token from database
@@ -68,39 +68,6 @@ export const updateProfile = asyncHandler(async (req, res, next) => {
   return res.status(200).json({ success: true, userInfo });
 });
 
-// @desc     Block & unblock user by id
-// @route    PATCH /api/v1/users/block/:userId
-// @access   Private/Admin
-export const blockUser = asyncHandler(async (req, res, next) => {
-  const user = await User.findById(req.params.userId);
-
-  // check if the user is found
-  if (!user) return next(new Error("User not found", { cause: 404 }));
-
-  // check if the user is admin or manager
-  if (user.role !== "user")
-    return next(new Error("You can't block this account", { cause: 400 }));
-
-  // check if the user is already blocked then unblock him
-  if (user.isBlocked.status) {
-    user.isBlocked.status = false;
-    user.isBlocked.reason = undefined;
-    await user.save();
-    return res
-      .status(200)
-      .json({ success: true, message: "user unblocked successfully" });
-  }
-
-  // block the user
-  user.isBlocked.status = true;
-  user.isBlocked.reason = req.body.reason;
-  await user.save();
-
-  return res
-    .status(200)
-    .json({ success: true, message: "user blocked successfully" });
-});
-
 // @desc     Get the number of users registered monthly for last year
 // @route    GET /api/v1/users/monthly-users
 // @access   Private/Admin
@@ -134,36 +101,104 @@ export const monthlyUsers = asyncHandler(async (req, res, next) => {
 // @route    GET /api/v1/users
 // @access   Private/Admin
 export const getUsers = asyncHandler(async (req, res, next) => {
-  const users = await User.find().select("-password");
+  let { page, limit, search } = req.query;
 
-  return res.status(200).json({ success: true, data: users });
+  page = !page || page < 1 || isNaN(page) ? 1 : page;
+  limit = !limit || limit < 1 || isNaN(limit) ? 20 : limit;
+  search = !search ? "" : search;
+
+  const users = await User.aggregate([
+    {
+      $match: {
+        email: { $regex: search, $options: "i" },
+      },
+    },
+    { $sort: { createdAt: -1 } },
+    { $skip: (page - 1) * limit },
+    { $limit: Number(limit) },
+    {
+      $lookup: {
+        from: "orders",
+        localField: "_id",
+        foreignField: "user",
+        as: "orders",
+      },
+    },
+    {
+      $project: {
+        _id: 1,
+        email: 1,
+        firstName: 1,
+        lastName: 1,
+        isBlocked: 1,
+        createdAt: 1,
+        ordersCount: { $size: "$orders" },
+        totalPrice: { $sum: "$orders.totalPrice" },
+      },
+    },
+  ]);
+
+  const count = await User.aggregate([
+    { $match: { email: { $regex: search, $options: "i" } } },
+  ]);
+
+  return res.status(200).json({
+    success: true,
+    page,
+    pages: Math.ceil(count.length / limit),
+    numOfUsers: count.length,
+    users,
+  });
 });
 
 // @desc     Get user by id
 // @route    GET /api/v1/users/:userId
 // @access   Private/Admin
 export const getUserById = asyncHandler(async (req, res, next) => {
-  const user = await User.findById(req.params.userId).select("-password");
+  const user = await User.findById(req.params.userId).select("-password -__v");
 
   if (!user) return next(new Error("User not found", { cause: 404 }));
 
-  return res.status(200).json({ success: true, data: user });
+  return res.status(200).json({ success: true, user });
 });
 
-// @desc     Delete user by id
-// @route    DELETE /api/v1/users/:userId
+// @desc     Block  user by id
+// @route    PATCH /api/v1/users/block/:userId
 // @access   Private/Admin
-export const deleteUserById = asyncHandler(async (req, res, next) => {
-  const user = await User.findByIdAndDelete(req.params.userId);
+export const blockUser = asyncHandler(async (req, res, next) => {
+  const user = await User.findById(req.params.userId);
 
   if (!user) return next(new Error("User not found", { cause: 404 }));
 
-  return res.status(200).json({ success: true, message: "user deleted" });
+  if (user.isAdmin)
+    return next(new Error("You can't block admin account", { cause: 400 }));
+
+  // block the user
+  user.isBlocked.status = true;
+  user.isBlocked.reason = req.body.reason;
+  user.isBlocked.date = Date.now();
+  await user.save();
+
+  await Token.deleteMany({ user: user._id });
+
+  return res
+    .status(200)
+    .json({ success: true, message: "User blocked successfully" });
 });
 
-// @desc     Update user by id
-// @route    PATCH /api/v1/users/:userId
+// @desc     unblock user by id
+// @route    PATCH /api/v1/users/block/:userId
 // @access   Private/Admin
-export const updateUserById = asyncHandler(async (req, res, next) => {
-  res.send("update user by id");
+export const unblockUser = asyncHandler(async (req, res, next) => {
+  const user = await User.findById(req.params.userId);
+
+  if (!user) return next(new Error("User not found", { cause: 404 }));
+
+  user.isBlocked.status = false;
+  user.isBlocked.reason = undefined;
+  user.isBlocked.date = undefined;
+  await user.save();
+  return res
+    .status(200)
+    .json({ success: true, message: "User unblocked successfully" });
 });
