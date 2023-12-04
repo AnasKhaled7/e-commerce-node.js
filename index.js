@@ -13,6 +13,7 @@ import brandRouter from "./src/modules/brand/brand.router.js";
 import productRouter from "./src/modules/product/product.router.js";
 import cartRouter from "./src/modules/cart/cart.router.js";
 import orderRouter from "./src/modules/order/order.router.js";
+import reviewRouter from "./src/modules/review/review.router.js";
 
 // DB connection
 mongoose
@@ -40,6 +41,7 @@ app.use("/api/v1/brands", brandRouter);
 app.use("/api/v1/products", productRouter);
 app.use("/api/v1/carts", cartRouter);
 app.use("/api/v1/orders", orderRouter);
+app.use("/api/v1/reviews", reviewRouter);
 
 // not found
 app.all("*", (req, res, next) =>
