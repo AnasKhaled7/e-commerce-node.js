@@ -52,7 +52,7 @@ export const getProducts = asyncHandler(async (req, res, next) => {
   let { page, limit, search } = req.query;
 
   page = !page || page < 1 || isNaN(page) ? 1 : page;
-  limit = !limit || limit < 1 || isNaN(limit) ? 20 : limit;
+  limit = !limit || limit < 1 || isNaN(limit) ? 8 : limit;
   search = !search ? "" : search;
 
   const count = await Product.aggregate([
@@ -127,7 +127,7 @@ export const getProductsByCategory = asyncHandler(async (req, res, next) => {
   let { page, limit, search } = req.query;
 
   page = !page || page < 1 || isNaN(page) ? 1 : page;
-  limit = !limit || limit < 1 || isNaN(limit) ? 20 : limit;
+  limit = !limit || limit < 1 || isNaN(limit) ? 8 : limit;
   search = !search ? "" : search;
 
   // check if the category exists
@@ -175,7 +175,6 @@ export const getProductsByCategory = asyncHandler(async (req, res, next) => {
       $project: {
         name: 1,
         image: 1,
-        category: { _id: 1, name: 1 },
         brand: { _id: 1, name: 1 },
         price: 1,
         countInStock: 1,
@@ -191,6 +190,7 @@ export const getProductsByCategory = asyncHandler(async (req, res, next) => {
     page,
     pages: Math.ceil(count.length / limit),
     numOfProducts: count.length,
+    category: category.name,
     products,
   });
 });
@@ -202,7 +202,7 @@ export const getProductsByBrand = asyncHandler(async (req, res, next) => {
   let { page, limit, search } = req.query;
 
   page = !page || page < 1 || isNaN(page) ? 1 : page;
-  limit = !limit || limit < 1 || isNaN(limit) ? 20 : limit;
+  limit = !limit || limit < 1 || isNaN(limit) ? 8 : limit;
   search = !search ? "" : search;
 
   // check if the brand exists
