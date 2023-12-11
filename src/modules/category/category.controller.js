@@ -41,7 +41,7 @@ export const getCategories = asyncHandler(async (req, res) => {
   let { page, limit, search } = req.query;
 
   page = !page || page < 1 || isNaN(page) ? 1 : page;
-  limit = !limit || limit < 1 || isNaN(limit) ? 20 : limit;
+  limit = !limit || limit < 1 || isNaN(limit) ? 8 : limit;
   search = !search ? "" : search;
 
   const count = await Category.aggregate([
@@ -54,14 +54,14 @@ export const getCategories = asyncHandler(async (req, res) => {
     { $sort: { createdAt: -1 } },
     { $skip: (page - 1) * limit },
     { $limit: Number(limit) },
-    { $project: { name: 1, image: 1 } },
+    { $project: { name: 1, image: "$image.url" } },
   ]);
 
   return res.status(200).json({
     success: true,
-    current: page,
-    total: Math.ceil(count.length / limit),
-    numberOfCategories: count.length,
+    page,
+    pages: Math.ceil(count.length / limit),
+    numOfCategories: count.length,
     categories,
   });
 });
@@ -89,7 +89,7 @@ export const getCategory = asyncHandler(async (req, res, next) => {
 });
 
 // @desc      Update category by id
-// @route     PUT /api/v1/categories/:categoryId
+// @route     PATCH /api/v1/categories/:categoryId
 // @access    Private/Admin
 export const updateCategory = asyncHandler(async (req, res, next) => {
   const { name } = req.body;

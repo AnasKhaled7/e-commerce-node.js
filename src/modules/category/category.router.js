@@ -27,7 +27,7 @@ router.get("/names", categoryController.getCategoriesNames);
 router.get("/:categoryId", categoryController.getCategory);
 
 // update category by id
-router.put(
+router.patch(
   "/:categoryId",
   isAuthenticated,
   isAdmin,
