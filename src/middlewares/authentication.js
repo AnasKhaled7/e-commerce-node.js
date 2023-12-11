@@ -7,7 +7,7 @@ const isAuthenticated = asyncHandler(async (req, res, next) => {
   let token = req.headers.authorization;
 
   // check token format
-  if (!token && !token.startsWith("Bearer "))
+  if (!token || !token.startsWith("Bearer "))
     return next(new Error("Access token not found", { cause: 401 }));
 
   // check payload
