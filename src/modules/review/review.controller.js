@@ -54,7 +54,12 @@ export const getReviews = asyncHandler(async (req, res, next) => {
   if (!product) return next(new Error("Product not found", { cause: 404 }));
 
   const reviews = await Review.aggregate([
-    { $match: { product: new mongoose.Types.ObjectId(productId) } },
+    {
+      $match: {
+        product: new mongoose.Types.ObjectId(productId),
+        comment: { $ne: "" },
+      },
+    },
     { $sort: { createdAt: -1 } },
     { $skip: (page - 1) * limit },
     { $limit: limit },
@@ -78,7 +83,10 @@ export const getReviews = asyncHandler(async (req, res, next) => {
     },
   ]);
 
-  const totalReviews = await Review.countDocuments({ product: productId });
+  const totalReviews = await Review.countDocuments({
+    product: productId,
+    comment: { $ne: "" },
+  });
 
   return res.status(200).json({
     success: true,
