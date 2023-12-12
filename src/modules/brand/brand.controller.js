@@ -4,7 +4,7 @@ import asyncHandler from "../../utils/asyncHandler.js";
 
 // @desc    Create brand
 // @route   POST /api/brands
-// @access  Private/Admin/Manager
+// @access  Private/Admin
 export const createBrand = asyncHandler(async (req, res, next) => {
   const { name } = req.body;
 
@@ -73,7 +73,7 @@ export const getBrandsNames = asyncHandler(async (req, res) => {
   return res.status(200).json({ success: true, brands });
 });
 
-// @desc    Get brand by id
+// @desc    Get brand
 // @route   GET /api/brands/:brandId
 // @access  Public
 export const getBrand = asyncHandler(async (req, res, next) => {
@@ -84,15 +84,14 @@ export const getBrand = asyncHandler(async (req, res, next) => {
   return res.status(200).json({ success: true, brand });
 });
 
-// @desc    Update brand by id
+// @desc    Update brand
 // @route   PATCH /api/brands/:brandId
-// @access  Private/Admin/Manager
+// @access  Private/Admin
 export const updateBrand = asyncHandler(async (req, res, next) => {
   const { name } = req.body;
 
   // check if body is empty
-  if (!name && !req.file)
-    return next(new Error("Name or image is required", { cause: 400 }));
+  if (!name) return next(new Error("Name is required", { cause: 400 }));
 
   // check if the brand is found
   const brand = await Brand.findById(req.params.brandId);
@@ -107,24 +106,39 @@ export const updateBrand = asyncHandler(async (req, res, next) => {
     brand.name = name;
   }
 
-  // file
-  if (req.file) {
-    const { secure_url } = await cloudinary.uploader.upload(req.file.path, {
-      public_id: brand.image.id,
-    });
-
-    brand.image.url = secure_url;
-  }
-
   await brand.save();
   return res
     .status(200)
     .json({ success: true, message: "Brand updated successfully", brand });
 });
 
-// @desc    Delete brand by id
+// @desc    Update brand image
+// @route   PATCH /api/brands/:brandId/image
+// @access  Private/Admin
+export const updateBrandImage = asyncHandler(async (req, res, next) => {
+  // file
+  if (!req.file) return next(new Error("Image is required", { cause: 400 }));
+
+  // check if the brand is found
+  const brand = await Brand.findById(req.params.brandId);
+  if (!brand) return next(new Error("Brand not found", { cause: 404 }));
+
+  // upload image to cloudinary
+  const { secure_url } = await cloudinary.uploader.upload(req.file.path, {
+    public_id: brand.image.id,
+  });
+
+  brand.image.url = secure_url;
+
+  await brand.save();
+  return res
+    .status(200)
+    .json({ success: true, message: "Brand image updated successfully" });
+});
+
+// @desc    Delete brand
 // @route   DELETE /api/brands/:brandId
-// @access  Private/Admin/Manager
+// @access  Private/Admin
 export const deleteBrand = asyncHandler(async (req, res, next) => {
   const brand = await Brand.findByIdAndDelete(req.params.brandId);
 

@@ -23,25 +23,38 @@ router.get("/", brandController.getBrands);
 // get brands names
 router.get("/names", brandController.getBrandsNames);
 
-// get brand by id
-router.get("/:brandId", brandController.getBrand);
+// get brand
+router.get(
+  "/:brandId",
+  isValid(brandValidation.brandIdSchema),
+  brandController.getBrand
+);
 
-// update brand by id
+// update brand
 router.patch(
   "/:brandId",
   isAuthenticated,
   isAdmin,
-  upload(filter.image).single("image"),
   isValid(brandValidation.updateBrandSchema),
   brandController.updateBrand
 );
 
-// delete brand by id
+// update brand image
+router.patch(
+  "/:brandId/image",
+  isAuthenticated,
+  isAdmin,
+  upload(filter.image).single("image"),
+  isValid(brandValidation.brandIdSchema),
+  brandController.updateBrandImage
+);
+
+// delete brand
 router.delete(
   "/:brandId",
   isAuthenticated,
   isAdmin,
-  isValid(brandValidation.deleteBrandSchema),
+  isValid(brandValidation.brandIdSchema),
   brandController.deleteBrand
 );
 

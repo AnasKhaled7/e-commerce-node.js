@@ -10,18 +10,15 @@ export const createBrandSchema = joi
   .required();
 
 // get all brands
-export const getBrandsSchema = joi.object({
-  page: joi.number(),
-  limit: joi.number(),
-  search: joi.string(),
-});
+export const getBrandsSchema = joi
+  .object({
+    page: joi.number(),
+    limit: joi.number(),
+    search: joi.string(),
+  })
+  .required();
 
-// get brand by id
-export const getBrandSchema = joi.object({
-  brandId: joi.string().custom(isValidObjectId).required(),
-});
-
-// update brand by id
+// update brand
 export const updateBrandSchema = joi
   .object({
     brandId: joi.string().custom(isValidObjectId).required(),
@@ -29,8 +26,8 @@ export const updateBrandSchema = joi
   })
   .required();
 
-// delete brand by id
-export const deleteBrandSchema = joi
+// get brand | update brand image | delete brand
+export const brandIdSchema = joi
   .object({
     brandId: joi.string().custom(isValidObjectId).required(),
   })
