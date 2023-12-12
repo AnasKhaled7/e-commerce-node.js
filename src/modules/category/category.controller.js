@@ -74,13 +74,11 @@ export const getCategoriesNames = asyncHandler(async (req, res) => {
   return res.status(200).json({ success: true, categories });
 });
 
-// @desc      Get category by id
+// @desc      Get category
 // @route     GET /api/v1/categories/:categoryId
 // @access    Public
 export const getCategory = asyncHandler(async (req, res, next) => {
-  const category = await Category.findById(req.params.categoryId).select(
-    "name"
-  );
+  const category = await Category.findById(req.params.categoryId);
 
   // check if the category is found
   if (!category) return next(new Error("Category not found", { cause: 404 }));
@@ -88,15 +86,14 @@ export const getCategory = asyncHandler(async (req, res, next) => {
   return res.status(200).json({ success: true, category });
 });
 
-// @desc      Update category by id
+// @desc      Update category
 // @route     PATCH /api/v1/categories/:categoryId
 // @access    Private/Admin
 export const updateCategory = asyncHandler(async (req, res, next) => {
   const { name } = req.body;
 
   // check if body is empty
-  if (!name || !req.file)
-    return next(new Error("Name or image is required", { cause: 400 }));
+  if (!name) return next(new Error("Name is required", { cause: 400 }));
 
   // check if the category is found
   const category = await Category.findById(req.params.categoryId);
@@ -104,7 +101,7 @@ export const updateCategory = asyncHandler(async (req, res, next) => {
 
   // check if the category is already exists
   if (name) {
-    isCategoryExist = await Category.findOne({ name });
+    const isCategoryExist = await Category.findOne({ name });
     if (isCategoryExist)
       return next(new Error("Category already exists", { cause: 409 }));
 
@@ -126,7 +123,31 @@ export const updateCategory = asyncHandler(async (req, res, next) => {
     .json({ success: true, message: "Category updated successfully" });
 });
 
-// @desc      Delete category by id
+// @desc      Update category image
+// @route     PATCH /api/v1/categories/:categoryId/image
+// @access    Private/Admin
+export const updateCategoryImage = asyncHandler(async (req, res, next) => {
+  // file
+  if (!req.file) return next(new Error("Image is required", { cause: 400 }));
+
+  // check if the category is found
+  const category = await Category.findById(req.params.categoryId);
+  if (!category) return next(new Error("Category not found", { cause: 404 }));
+
+  // upload image to cloudinary
+  const { secure_url } = await cloudinary.uploader.upload(req.file.path, {
+    public_id: category.image.id,
+  });
+
+  category.image.url = secure_url;
+  await category.save();
+
+  return res
+    .status(200)
+    .json({ success: true, message: "Category image updated successfully" });
+});
+
+// @desc      Delete category
 // @route     DELETE /api/v1/categories/:categoryId
 // @access    Private/Admin
 export const deleteCategory = asyncHandler(async (req, res, next) => {

@@ -16,12 +16,7 @@ export const getCategoriesSchema = joi.object({
   search: joi.string(),
 });
 
-// get category by id
-export const getCategorySchema = joi.object({
-  categoryId: joi.string().custom(isValidObjectId).required(),
-});
-
-// update category by id
+// update category
 export const updateCategorySchema = joi
   .object({
     categoryId: joi.string().custom(isValidObjectId).required(),
@@ -29,8 +24,8 @@ export const updateCategorySchema = joi
   })
   .required();
 
-// delete category by id
-export const deleteCategorySchema = joi
+// delete category | update category image | get category
+export const categoryIdSchema = joi
   .object({
     categoryId: joi.string().custom(isValidObjectId).required(),
   })

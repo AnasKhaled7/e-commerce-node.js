@@ -23,25 +23,38 @@ router.get("/", categoryController.getCategories);
 // get categories names
 router.get("/names", categoryController.getCategoriesNames);
 
-// get category by id
-router.get("/:categoryId", categoryController.getCategory);
+// get category
+router.get(
+  "/:categoryId",
+  isValid(categoryValidation.categoryIdSchema),
+  categoryController.getCategory
+);
 
-// update category by id
+// update category
 router.patch(
   "/:categoryId",
   isAuthenticated,
   isAdmin,
-  upload(filter.image).single("image"),
   isValid(categoryValidation.updateCategorySchema),
   categoryController.updateCategory
 );
 
-// delete category by id
+// update category image
+router.patch(
+  "/:categoryId/image",
+  isAuthenticated,
+  isAdmin,
+  upload(filter.image).single("image"),
+  isValid(categoryValidation.categoryIdSchema),
+  categoryController.updateCategoryImage
+);
+
+// delete category
 router.delete(
   "/:categoryId",
   isAuthenticated,
   isAdmin,
-  isValid(categoryValidation.updateCategorySchema),
+  isValid(categoryValidation.categoryIdSchema),
   categoryController.deleteCategory
 );
 
