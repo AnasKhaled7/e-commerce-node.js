@@ -29,6 +29,10 @@ export const createProduct = asyncHandler(async (req, res, next) => {
     { folder: `${process.env.CLOUDINARY_FOLDER_NAME}/products` }
   );
 
+  // calculate final price
+  const finalPrice =
+    req.body.price - (req.body.price * req.body.discount) / 100;
+
   // create product
   await Product.create({
     user: req.user._id,
@@ -40,6 +44,7 @@ export const createProduct = asyncHandler(async (req, res, next) => {
     price: req.body.price,
     countInStock: req.body.countInStock,
     discount: req.body.discount,
+    finalPrice,
   });
 
   return res.status(201).json({ success: true });
@@ -93,6 +98,7 @@ export const getProducts = asyncHandler(async (req, res, next) => {
         rating: 1,
         numReviews: 1,
         discount: 1,
+        finalPrice: 1,
       },
     },
   ]);
@@ -181,6 +187,7 @@ export const getProductsByCategory = asyncHandler(async (req, res, next) => {
         rating: 1,
         numReviews: 1,
         discount: 1,
+        finalPrice: 1,
       },
     },
   ]);
@@ -257,6 +264,7 @@ export const getProductsByBrand = asyncHandler(async (req, res, next) => {
         rating: 1,
         numReviews: 1,
         discount: 1,
+        finalPrice: 1,
       },
     },
   ]);
@@ -316,7 +324,10 @@ export const updateProduct = asyncHandler(async (req, res, next) => {
   product.description = description ? description : product.description;
   product.price = price ? price : product.price;
   product.countInStock = countInStock ? countInStock : product.countInStock;
-  product.discount = discount ? discount : product.discount;
+  if (discount) {
+    product.discount = discount;
+    product.finalPrice = product.price - (product.price * discount) / 100;
+  }
   await product.save();
 
   return res

@@ -10,7 +10,7 @@ export const createProductSchema = joi
     price: joi.number().min(1).required(),
     category: joi.string().custom(isValidObjectId).required(),
     brand: joi.string().custom(isValidObjectId).required(),
-    countInStock: joi.number().min(1).required(),
+    countInStock: joi.number().min(0).required(),
     discount: joi.number().min(0).max(100).default(0),
   })
   .required();
@@ -56,7 +56,7 @@ export const updateProductSchema = joi
     name: joi.string().trim(),
     description: joi.string().trim(),
     price: joi.number().min(1),
-    countInStock: joi.number().min(1),
+    countInStock: joi.number().min(0),
     category: joi.string().custom(isValidObjectId),
     brand: joi.string().custom(isValidObjectId),
     discount: joi.number().min(0).max(100).default(0),
