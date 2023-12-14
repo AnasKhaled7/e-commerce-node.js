@@ -65,7 +65,13 @@ export const updateProfile = asyncHandler(async (req, res, next) => {
 
   user.phone = user.decryptPhone();
   const { password: userPassword, __v, ...userInfo } = user._doc;
-  return res.status(200).json({ success: true, userInfo });
+  return res
+    .status(200)
+    .json({
+      success: true,
+      message: "Profile updated successfully!",
+      userInfo,
+    });
 });
 
 // @desc     Get the number of users registered monthly for last year
