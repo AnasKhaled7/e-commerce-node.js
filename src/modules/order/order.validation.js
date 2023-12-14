@@ -14,6 +14,8 @@ export const createOrderSchema = joi
           image: joi.string().required(),
           price: joi.number().required(),
           quantity: joi.number().required(),
+          discount: joi.number().default(0),
+          finalPrice: joi.number().required(),
         })
       )
       .required(),

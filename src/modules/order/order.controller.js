@@ -1,4 +1,4 @@
-import { Order } from "../../models/index.js";
+import { Order, Product } from "../../models/index.js";
 import asyncHandler from "../../utils/asyncHandler.js";
 
 // @desc      Create order
@@ -17,6 +17,16 @@ export const createOrder = asyncHandler(async (req, res, next) => {
     phone: req.body.phone,
     totalPrice: req.body.totalPrice,
   });
+
+  // decrease countInStock of ordered products & increase sold of ordered products
+  for (const item of order.orderItems) {
+    const product = await Product.findById(item.product);
+
+    product.countInStock -= item.quantity;
+    product.sold += item.quantity;
+
+    await product.save();
+  }
 
   res.status(201).json({ success: true, order });
 });
