@@ -322,8 +322,12 @@ export const updateProduct = asyncHandler(async (req, res, next) => {
 
   // update product
   product.description = description ? description : product.description;
-  product.price = price ? price : product.price;
   product.countInStock = countInStock ? countInStock : product.countInStock;
+  if (price) {
+    product.price = price;
+    product.finalPrice =
+      product.price - (product.price * product.discount) / 100;
+  }
   if (discount) {
     product.discount = discount;
     product.finalPrice = product.price - (product.price * discount) / 100;
@@ -365,12 +369,16 @@ export const updateProductImage = asyncHandler(async (req, res, next) => {
 // @route     DELETE /api/v1/products/:productId
 // @access    Private/Admin
 export const deleteProduct = asyncHandler(async (req, res, next) => {
-  const product = await Product.findByIdAndDelete(req.params.productId);
+  const { productId } = req.params;
+  const product = await Product.findByIdAndDelete(productId);
 
   if (!product) return next(new Error("Product not found", { cause: 404 }));
 
   // delete images from cloudinary
   await cloudinary.uploader.destroy(product.image.id);
+
+  // delete reviews
+  await Review.deleteMany({ product: productId });
 
   return res
     .status(200)
