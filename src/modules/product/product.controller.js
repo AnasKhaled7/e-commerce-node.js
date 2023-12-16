@@ -1,4 +1,4 @@
-import { Brand, Category, Product } from "../../models/index.js";
+import { Brand, Category, Product, Review } from "../../models/index.js";
 import asyncHandler from "./../../utils/asyncHandler.js";
 import cloudinary from "../../utils/cloud.js";
 
