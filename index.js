@@ -2,7 +2,6 @@ import dotenv from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
-import cookieParser from "cookie-parser";
 
 dotenv.config();
 
@@ -28,10 +27,6 @@ app.use(cors());
 
 // body parser middleware
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// cookie parser
-app.use(cookieParser());
 
 // routes
 app.use("/api/v1/auth", authRouter);

@@ -1,7 +1,7 @@
 {
   "name": "e-commerce-nodejs",
   "version": "1.0.0",
-  "description": "e-commerce-nodejs is a backend project for an e-commerce website.",
+  "description": "E-commerce Backend",
   "main": "index.js",
   "type": "module",
   "scripts": {
@@ -17,7 +17,6 @@
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cloudinary": "^1.41.0",
-    "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "crypto-js": "^4.2.0",
     "dotenv": "^16.3.1",
