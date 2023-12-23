@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import cryptoJS from "crypto-js";
 
 // schema
 const OrderSchema = new mongoose.Schema(
@@ -43,26 +42,6 @@ const OrderSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
-// hooks
-OrderSchema.pre("save", async function (next) {
-  // encrypt phone number
-  if (this.isModified("phone")) {
-    this.phone = cryptoJS.AES.encrypt(
-      this.phone,
-      process.env.ENCRYPTION_KEY
-    ).toString();
-  }
-
-  next();
-});
-
-// methods
-OrderSchema.methods.decryptPhone = function () {
-  return cryptoJS.AES.decrypt(this.phone, process.env.ENCRYPTION_KEY).toString(
-    cryptoJS.enc.Utf8
-  );
-};
 
 // model
 const Order = mongoose.models.Order || mongoose.model("Order", OrderSchema);

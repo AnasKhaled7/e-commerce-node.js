@@ -28,7 +28,7 @@ export const register = asyncHandler(async (req, res, next) => {
 
   return res
     .status(201)
-    .json({ success: true, message: "User account created successfully" });
+    .json({ success: true, message: "Account created successfully" });
 });
 
 // @desc     Login
@@ -57,9 +57,8 @@ export const login = asyncHandler(async (req, res, next) => {
 
   await Token.create({ user: user._id, token });
 
-  user.phone = user.decryptPhone();
-  const { password, __v, ...userInfo } = user._doc;
-  return res.status(200).json({ success: true, token, userInfo });
+  const { password, ...rest } = user._doc;
+  return res.status(200).json({ success: true, token, user: rest });
 });
 
 // @desc     Send reset password code to email

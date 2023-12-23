@@ -5,8 +5,9 @@ import asyncHandler from "../../utils/asyncHandler.js";
 // @route    GET /api/v1/users/profile
 // @access   Private
 export const getProfile = asyncHandler(async (req, res, next) => {
-  const user = await User.findById(req.user._id).select("-password -__v");
-  user.phone = user.decryptPhone();
+  const user = await User.findById(req.user._id).select(
+    "-password -__v -createdAt -updatedAt -isBlocked -resetPasswordCode"
+  );
   return res.status(200).json({ success: true, user });
 });
 
@@ -63,15 +64,12 @@ export const updateProfile = asyncHandler(async (req, res, next) => {
 
   await user.save();
 
-  user.phone = user.decryptPhone();
-  const { password: userPassword, __v, ...userInfo } = user._doc;
-  return res
-    .status(200)
-    .json({
-      success: true,
-      message: "Profile updated successfully!",
-      userInfo,
-    });
+  const { password: _, ...rest } = user._doc;
+  return res.status(200).json({
+    success: true,
+    message: "Profile updated successfully",
+    user: rest,
+  });
 });
 
 // @desc     Get the number of users registered monthly for last year
