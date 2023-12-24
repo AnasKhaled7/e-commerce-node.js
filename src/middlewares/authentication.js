@@ -7,7 +7,7 @@ const isAuthenticated = asyncHandler(async (req, res, next) => {
   let token = req.headers.authorization;
 
   // check token format
-  if (!token || !token.startsWith("Bearer "))
+  if (!token || !token.startsWith(`${process.env.BEARER_TOKEN} `))
     return next(new Error("Access token not found", { cause: 401 }));
 
   // check payload
@@ -28,6 +28,14 @@ const isAuthenticated = asyncHandler(async (req, res, next) => {
   // check if the user is blocked
   if (user.isBlocked.status)
     return next(new Error("Your account is blocked", { cause: 403 }));
+
+  // check if the token is expired
+  if (
+    tokenDB.expiresIn < Date.now() ||
+    tokenDB.user.toString() !== user._id.toString() ||
+    tokenDB.token !== token
+  )
+    return next(new Error("Access token expired", { cause: 401 }));
 
   req.user = user;
   req.token = token;

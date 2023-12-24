@@ -5,6 +5,7 @@ const TokenSchema = new mongoose.Schema(
   {
     user: { type: mongoose.Types.ObjectId, ref: "User", required: true },
     token: { type: String, unique: true, required: true },
+    expiresIn: { type: Date, required: true },
   },
   { timestamps: true }
 );

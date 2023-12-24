@@ -64,11 +64,9 @@ export const updateProfile = asyncHandler(async (req, res, next) => {
 
   await user.save();
 
-  const { password: _, ...rest } = user._doc;
   return res.status(200).json({
     success: true,
     message: "Profile updated successfully",
-    user: rest,
   });
 });
 

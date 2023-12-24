@@ -5,6 +5,16 @@ import { User, Cart, Token } from "../../models/index.js";
 import asyncHandler from "../../utils/asyncHandler.js";
 import sendEmail from "../../utils/sendEmail.js";
 
+// @desc     Create token
+// @access   Private
+const createToken = (user) => {
+  return jwt.sign(
+    { userId: user._id, isAdmin: user.isAdmin },
+    process.env.JWT_SECRET,
+    { expiresIn: "7d" }
+  );
+};
+
 // @desc     Register
 // @route    POST /api/v1/auth/register
 // @access   Public
@@ -26,9 +36,18 @@ export const register = asyncHandler(async (req, res, next) => {
   // create cart
   await Cart.create({ user: user._id });
 
+  // create token
+  const token = createToken(user);
+
+  await Token.create({
+    user: user._id,
+    token,
+    expiresIn: Date.now() + 7 * 24 * 60 * 60 * 1000,
+  });
+
   return res
     .status(201)
-    .json({ success: true, message: "Account created successfully" });
+    .json({ success: true, token, message: "User created" });
 });
 
 // @desc     Login
@@ -43,22 +62,15 @@ export const login = asyncHandler(async (req, res, next) => {
   const isMatch = await user.matchPassword(req.body.password);
   if (!isMatch) return next(new Error("Invalid credentials", { cause: 400 }));
 
-  // generate token
-  const token = jwt.sign(
-    {
-      userId: user._id,
-      email: user.email,
-      isAdmin: user.isAdmin,
-      firstName: user.firstName,
-      lastName: user.lastName,
-    },
-    process.env.JWT_SECRET
-  );
+  const token = createToken(user);
 
-  await Token.create({ user: user._id, token });
+  await Token.create({
+    user: user._id,
+    token,
+    expiresIn: Date.now() + 7 * 24 * 60 * 60 * 1000,
+  });
 
-  const { password, ...rest } = user._doc;
-  return res.status(200).json({ success: true, token, user: rest });
+  return res.status(200).json({ success: true, token, message: "Logged in" });
 });
 
 // @desc     Send reset password code to email
